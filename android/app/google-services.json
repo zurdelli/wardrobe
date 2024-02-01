@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "881072867639",
+    "firebase_url": "https://wardrobe-f8e31-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "wardrobe-f8e31",
+    "storage_bucket": "wardrobe-f8e31.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881072867639:android:157413159eca0b9b5e32b2",
+        "android_client_info": {
+          "package_name": "com.zapps.wardrobe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyptq4_a3nnPmHqtj-lRHW7wlYtNrQOxc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
