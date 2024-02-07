@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/data/clothes_model.dart';
+import 'package:wardrobe/provider/category_provider.dart';
 import 'package:wardrobe/provider/clothes_provider.dart';
 import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
@@ -29,23 +30,25 @@ class ClothesForm extends StatefulWidget {
 
 class _ClothesFormState extends State<ClothesForm> {
   late Clothes clothes;
-  String actualUser = "";
+  String currentUser = "", currentCategory = "";
   late DatabaseReference _clothesRef;
 
   updateClothes(Clothes prenda) {
     Provider.of<ClothesProvider>(context, listen: false).brand = prenda.brand;
     Provider.of<ClothesProvider>(context, listen: false).color =
         stringToColor(prenda.color);
-    Provider.of<ClothesProvider>(context, listen: false).date =
-        prenda.date as String;
+    Provider.of<ClothesProvider>(context, listen: false).date = prenda.date;
     Provider.of<ClothesProvider>(context, listen: false).photoAsString =
         prenda.image;
     Provider.of<ClothesProvider>(context, listen: false).place = prenda.place;
     Provider.of<ClothesProvider>(context, listen: false).size = prenda.size;
     Provider.of<ClothesProvider>(context, listen: false).status = prenda.status;
     Provider.of<ClothesProvider>(context, listen: false).store = prenda.store;
-    actualUser = Provider.of<UserProvider>(context, listen: false).currentUser;
-    _clothesRef = FirebaseDatabase.instance.ref().child(actualUser);
+    currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
+    currentCategory =
+        Provider.of<CategoryProvider>(context, listen: false).currentCategory;
+    _clothesRef =
+        FirebaseDatabase.instance.ref().child('$currentUser/$currentCategory');
   }
 
   @override

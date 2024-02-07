@@ -3,9 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:wardrobe/data/categories_model.dart';
-//import 'package:tappitas/db.dart';
-import 'package:wardrobe/data/clothes_model.dart';
-import 'package:wardrobe/screens/home.dart';
 
 /// Translates color <-> string
 String colorToString(Color color) {
@@ -146,10 +143,8 @@ List<CategoriesModel> categoriesList2 = <CategoriesModel>[
       tipo: 'Pantalones', image: Image.asset('assets/images/pantalones.png')),
 ];
 
-/// AlertDialog para la busqueda de clothes
-/// dialog = 0 -> Busqueda de clothes (alertBusqueda)
-///        = 1 -> Zoom tapa (alertTapa)
-alertTapa(BuildContext context, String tapaAsString, {required String dialog}) {
+/// Abre un dialog con más informacion y una foto más grande
+showExpandedInfo(BuildContext context, String imageAsString) {
   showDialog(
       context: context,
       builder: (BuildContext context) => BackdropFilter(
@@ -162,7 +157,7 @@ alertTapa(BuildContext context, String tapaAsString, {required String dialog}) {
                   width: 250,
                   child: Center(
                     child: CircleAvatar(
-                      backgroundImage: MemoryImage(base64Decode(tapaAsString)),
+                      backgroundImage: MemoryImage(base64Decode(imageAsString)),
                       radius: 200.0,
                     ),
                   )),

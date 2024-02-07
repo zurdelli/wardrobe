@@ -6,7 +6,7 @@ import 'package:flutter_signin_button/button_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
-import 'package:wardrobe/screens/home.dart';
+import 'package:wardrobe/screens/home/home.dart';
 import 'package:wardrobe/screens/register.dart';
 
 /// Representa la pantalla para hacer login del user

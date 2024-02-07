@@ -5,6 +5,7 @@ class CategoryProvider extends ChangeNotifier {
   String _currentCategory = "";
 
   String get currentCategory => _currentCategory;
+
   set currentCategory(String newValue) {
     _currentCategory = newValue;
     notifyListeners();

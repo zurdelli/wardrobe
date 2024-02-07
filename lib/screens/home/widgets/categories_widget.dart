@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wardrobe/provider/category_provider.dart';
 
 /// Representa al widget mostrado en la home donde se visualiza cada categoria
 class CategoriesWidget extends StatelessWidget {
@@ -7,11 +9,17 @@ class CategoriesWidget extends StatelessWidget {
 
   final String nombre;
   final String image;
+  final bool isSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Provider.of<CategoryProvider>(context, listen: false)
+              .currentCategory = nombre;
+          print(Provider.of<CategoryProvider>(context, listen: false)
+              .currentCategory = nombre);
+        },
         child: Column(
           children: [
             AnimatedContainer(
