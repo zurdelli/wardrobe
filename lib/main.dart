@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:wardrobe/provider/category_provider.dart';
+import 'package:wardrobe/provider/clothes_provider.dart';
+import 'package:wardrobe/provider/location_provider.dart';
+import 'package:wardrobe/provider/user_provider.dart';
+import 'package:wardrobe/screens/add_modify_form/add_clothes_form.dart';
+import 'package:wardrobe/screens/home.dart';
+import 'package:wardrobe/screens/login.dart';
 import 'firebase_options.dart';
-import 'package:wardrobe/screens/listamensajes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,10 +24,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Ejemplo Chat',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: ListaMensajes(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ClothesProvider()),
+        ChangeNotifierProvider(create: (context) => CategoryProvider()),
+        ChangeNotifierProvider(create: (context) => LocationProvider()),
+        ChangeNotifierProvider(create: (context) => UserProvider())
+      ],
+      child: MaterialApp(
+        title: 'wardrobe',
+        theme: ThemeData(primarySwatch: Colors.amber),
+        initialRoute: "/login",
+        routes: {
+          "/": (context) => MyWardrobe(),
+          "/login": (context) => LoginPage(),
+          "/formclothes": (context) => const ClothesForm(),
+        },
+      ),
     );
   }
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:wardrobe/data/mensaje_dao.dart';
-import 'package:wardrobe/data/message.dart';
+import 'package:wardrobe/data/message_model.dart';
 import 'package:wardrobe/widgets/mensajewidget.dart';
 
+/// Clase copiada de otro proyecto - Representa la lista de mensajes mostrados
+/// en la pantalla principal
 class ListaMensajes extends StatefulWidget {
   ListaMensajes({Key? key}) : super(key: key);
   final mensajeDAO = MensajeDAO();

@@ -1,0 +1,96 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/provider.dart';
+
+import 'package:wardrobe/provider/clothes_provider.dart';
+import 'package:wardrobe/utilities.dart';
+
+class ColorsRow extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ColorsRowState();
+}
+
+class _ColorsRowState extends State<ColorsRow> {
+  Color _color = Colors.transparent;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _color = Provider.of<ClothesProvider>(context, listen: false).color;
+    });
+  }
+
+  void setcolor(Color newColor) => setState(() {
+        _color = newColor;
+        Provider.of<ClothesProvider>(context, listen: false).color = _color;
+      });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          flex: 1,
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+                //minimumSize: Size(160, 60),
+                shape: ContinuousRectangleBorder(),
+                side: BorderSide(
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? Colors.black
+                        : Colors.white,
+                    width: 0.5),
+                backgroundColor: _color,
+                foregroundColor: _color == Colors.white ||
+                        MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                    ? Colors.black
+                    : Colors.white),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Pick a color"),
+                    content: SingleChildScrollView(
+                      child: BlockPicker(
+                        pickerColor: _color,
+                        onColorChanged: (value) => setcolor(value),
+                        availableColors: colors,
+                        layoutBuilder: pickerLayoutBuilder,
+                        itemBuilder: pickerItemBuilder,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text('Ok'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.color_lens)),
+                  TextSpan(
+                      text: colorToString(_color).isEmpty
+                          ? '1st color'
+                          : colorToString(_color))
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

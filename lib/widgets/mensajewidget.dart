@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wardrobe/data/mensaje_dao.dart';
-import 'package:wardrobe/data/message.dart';
+import 'package:wardrobe/data/message_model.dart';
 
+/// Clase copiada de otro proyecto. Es el modelo de mensaje que aparece en la
+/// pantalla principal
 class MensajeWidget extends StatelessWidget {
   final String texto;
   final DateTime fecha;

@@ -1,5 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
-import 'message.dart';
+import 'message_model.dart';
 
 /// Mensaje DATA ACCESS OBJECT. Aqui se hace el CRUD de la base de datos
 class MensajeDAO {

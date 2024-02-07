@@ -1,5 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
-import 'clothes_detailed.dart';
+import 'package:provider/provider.dart';
+import 'package:wardrobe/provider/user_provider.dart';
+import 'clothes_model.dart';
 
 /// clothes DATA ACCESS OBJECT. Aqui se hace el CRUD de la base de datos
 class ClothesDAO {
@@ -18,7 +20,7 @@ class ClothesDAO {
   }
 
   /// Read clothess
-  Query getclothess() => _clothesRef;
+  Query getclothes() => _clothesRef;
 
   /// Delete clothess
   deleteclothes(String id) => _singleClothesRef(id).remove();
