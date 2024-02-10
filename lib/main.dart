@@ -7,6 +7,7 @@ import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/add_modify_form/add_clothes_form.dart';
 import 'package:wardrobe/screens/home/home.dart';
+import 'package:wardrobe/screens/listaWardobe.dart';
 import 'package:wardrobe/screens/login.dart';
 import 'firebase_options.dart';
 
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
           "/": (context) => MyWardrobe(),
           "/login": (context) => const LoginPage(),
           "/formclothes": (context) => const ClothesForm(),
+          "/listaWardrobe": (context) => ListaWardrobe()
         },
       ),
     );

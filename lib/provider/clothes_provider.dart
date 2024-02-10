@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Provider of all the fields used in form to add or modify
 class ClothesProvider extends ChangeNotifier {
   String _photoAsString = "";
+  String _category = "";
   String _brand = "";
   String _store = "";
   String _place = "";
@@ -10,6 +11,12 @@ class ClothesProvider extends ChangeNotifier {
   String _size = "";
   String _date = "";
   Color _color = Colors.transparent;
+
+  String get category => _category;
+  set category(String newValue) {
+    _category = newValue;
+    notifyListeners();
+  }
 
   String get photoAsString => _photoAsString;
   set photoAsString(String newValue) {

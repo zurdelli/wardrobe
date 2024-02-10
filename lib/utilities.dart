@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:geocoding/geocoding.dart' as geocoding_package;
+import 'package:location/location.dart' as location_package;
 import 'package:wardrobe/data/categories_model.dart';
 
 /// Translates color <-> string
@@ -214,4 +216,41 @@ Widget pickerItemBuilder(
       ),
     ),
   );
+}
+
+Future<String> getLocation() async {
+  location_package.Location location = location_package.Location();
+
+  bool serviceEnabled;
+  location_package.PermissionStatus permissionGranted;
+  location_package.LocationData locationData;
+
+  serviceEnabled = await location.serviceEnabled();
+  if (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
+    if (!serviceEnabled) {
+      return "";
+    }
+  }
+
+  permissionGranted = await location.hasPermission();
+  if (permissionGranted == location_package.PermissionStatus.denied) {
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != location_package.PermissionStatus.granted) {
+      return "";
+    }
+  }
+
+  locationData = await location.getLocation();
+
+  //print("La latitud es: ${locationData.latitude}");
+  double latitud = locationData.latitude ?? 0;
+  double longitud = locationData.longitude ?? 0;
+
+  List<geocoding_package.Placemark> placemarks =
+      await geocoding_package.placemarkFromCoordinates(latitud, longitud);
+
+  String place = "${placemarks[0].locality}, ${placemarks[0].country}";
+
+  return place;
 }

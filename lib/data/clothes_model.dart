@@ -1,7 +1,7 @@
 /// Representa al model del Clothes
 class Clothes {
   final String date;
-  //final String category;
+  final String category;
   final String subcategory;
   final String status;
   final String color;
@@ -13,7 +13,8 @@ class Clothes {
   final String image;
 
   Clothes(
-      {required this.subcategory,
+      {required this.category,
+      required this.subcategory,
       required this.brand,
       required this.color,
       required this.status,
@@ -26,7 +27,8 @@ class Clothes {
 
   /// Recibe un json y lo convierte a datos de las prendas
   Clothes.fromJson(Map<dynamic, dynamic> json)
-      : subcategory = json['subcategory'] as String,
+      : category = json['category'] as String,
+        subcategory = json['subcategory'] as String,
         brand = json['brand'] as String,
         color = json['color'] as String,
         status = json['status'] as String,
@@ -38,6 +40,7 @@ class Clothes {
         image = json['image'] as String;
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
+        'category': category,
         'subcategory': subcategory,
         'brand': brand,
         'color': color,

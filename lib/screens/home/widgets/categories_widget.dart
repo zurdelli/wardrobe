@@ -15,10 +15,11 @@ class CategoriesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
-          Provider.of<CategoryProvider>(context, listen: false)
-              .currentCategory = nombre;
-          print(Provider.of<CategoryProvider>(context, listen: false)
-              .currentCategory = nombre);
+          // Provider.of<CategoryProvider>(context, listen: false)
+          //     .currentCategory = nombre;
+          context.read<CategoryProvider>().currentCategory = nombre;
+          // print(
+          //     Provider.of<CategoryProvider>(context).currentCategory = nombre);
         },
         child: Column(
           children: [

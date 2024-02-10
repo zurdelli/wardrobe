@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:provider/provider.dart';
 import 'package:wardrobe/provider/clothes_provider.dart';
+import 'package:wardrobe/utilities.dart';
 
 class StoreDatePlace extends StatefulWidget {
   const StoreDatePlace({super.key});
@@ -89,8 +90,10 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
                     color: Colors.blue,
                     //alignment: Alignment.centerRight,
                     icon: Icon(Icons.gps_fixed),
-                    onPressed: () {
-                      getLocation();
+                    onPressed: () async {
+                      placeController.text = await getLocation();
+                      Provider.of<ClothesProvider>(context, listen: false)
+                          .place = placeController.text;
                     },
                   ),
                   labelText: 'Place',
@@ -102,45 +105,46 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
       ],
     );
   }
+}
 
   /// Obtiene el lugar actual donde se encuentra el usuario a través del paquete
   /// location.
-  Future getLocation() async {
-    location_package.Location location = location_package.Location();
+//   Future getLocation() async {
+//     location_package.Location location = location_package.Location();
 
-    bool serviceEnabled;
-    location_package.PermissionStatus permissionGranted;
-    location_package.LocationData locationData;
+//     bool serviceEnabled;
+//     location_package.PermissionStatus permissionGranted;
+//     location_package.LocationData locationData;
 
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
-    }
+//     serviceEnabled = await location.serviceEnabled();
+//     if (!serviceEnabled) {
+//       serviceEnabled = await location.requestService();
+//       if (!serviceEnabled) {
+//         return;
+//       }
+//     }
 
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == location_package.PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != location_package.PermissionStatus.granted) {
-        return;
-      }
-    }
+//     permissionGranted = await location.hasPermission();
+//     if (permissionGranted == location_package.PermissionStatus.denied) {
+//       permissionGranted = await location.requestPermission();
+//       if (permissionGranted != location_package.PermissionStatus.granted) {
+//         return;
+//       }
+//     }
 
-    locationData = await location.getLocation();
+//     locationData = await location.getLocation();
 
-    //print("La latitud es: ${locationData.latitude}");
-    double latitud = locationData.latitude ?? 0;
-    double longitud = locationData.longitude ?? 0;
+//     //print("La latitud es: ${locationData.latitude}");
+//     double latitud = locationData.latitude ?? 0;
+//     double longitud = locationData.longitude ?? 0;
 
-    List<geocoding_package.Placemark> placemarks =
-        await geocoding_package.placemarkFromCoordinates(latitud, longitud);
+//     List<geocoding_package.Placemark> placemarks =
+//         await geocoding_package.placemarkFromCoordinates(latitud, longitud);
 
-    String place = "${placemarks[0].locality}, ${placemarks[0].country}";
+//     String place = "${placemarks[0].locality}, ${placemarks[0].country}";
 
-    placeController.text = place;
-    Provider.of<ClothesProvider>(context, listen: false).place = place;
-    //return place;
-  }
-}
+//     placeController.text = place;
+//     Provider.of<ClothesProvider>(context, listen: false).place = place;
+//     //return place;
+//   }
+// }

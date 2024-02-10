@@ -47,8 +47,7 @@ class _ClothesFormState extends State<ClothesForm> {
     currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
     currentCategory =
         Provider.of<CategoryProvider>(context, listen: false).currentCategory;
-    _clothesRef =
-        FirebaseDatabase.instance.ref().child('$currentUser/$currentCategory');
+    _clothesRef = FirebaseDatabase.instance.ref().child(currentUser);
   }
 
   @override
@@ -83,8 +82,7 @@ class _ClothesFormState extends State<ClothesForm> {
         TextButton(
           onPressed: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => CreateUser())),
-          child: Text(Provider.of<LocationProvider>(context, listen: false)
-              .currentLocation),
+          child: Text(context.read<CategoryProvider>().currentCategory),
         )
       ],
     );
@@ -94,6 +92,7 @@ class _ClothesFormState extends State<ClothesForm> {
     return FloatingActionButton.extended(
         onPressed: () {
           guardarPrenda(Clothes(
+              category: context.read<CategoryProvider>().currentCategory,
               subcategory: 'camisetas deportivas',
               brand: Provider.of<ClothesProvider>(context, listen: false)
                   .brand
