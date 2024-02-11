@@ -5,9 +5,11 @@ import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/home/home.dart';
 import 'package:wardrobe/screens/register.dart';
+import 'package:wardrobe/utilities.dart';
 
 /// Representa la pantalla para hacer login del user
 class LoginPage extends StatefulWidget {
@@ -140,10 +142,17 @@ class LoginPageState extends State<LoginPage> {
         ],
       );
 
-  logueaYGuardaUsuario(User? usuario) {
+  logueaYGuardaUsuario(User? usuario) async {
+    // Se quitan los puntos del email ya que la base de datos no acepta puntos en sus rutas
+    // también elegí guardar los usuarios con su correo electronico así cada uno es único
+    // e irrepetible
     Provider.of<UserProvider>(context, listen: false).currentUser =
         FirebaseAuth.instance.currentUser?.email?.replaceAll(".", "") ?? "";
+    context.read<UserProvider>().currentUserName =
+        FirebaseAuth.instance.currentUser?.displayName ?? "";
     print(Provider.of<UserProvider>(context, listen: false).currentUser);
+    context.read<LocationProvider>().currentLocation = await getLocation();
+    // ignore: use_build_context_synchronously
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MyWardrobe()),

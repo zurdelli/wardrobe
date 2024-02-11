@@ -7,6 +7,7 @@ import 'package:wardrobe/provider/clothes_provider.dart';
 import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/brand_model_row/brand_model.dart';
+import 'package:wardrobe/screens/add_modify_form/widgets/photo_row/photo_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/store_place_date/store_place_date.dart';
 import 'package:wardrobe/screens/register.dart';
 import 'package:wardrobe/utilities.dart';
@@ -32,28 +33,29 @@ class _ClothesFormState extends State<ClothesForm> {
   late Clothes clothes;
   String currentUser = "", currentCategory = "";
   late DatabaseReference _clothesRef;
+  bool amImodifying = false;
 
   updateClothes(Clothes prenda) {
-    Provider.of<ClothesProvider>(context, listen: false).brand = prenda.brand;
-    Provider.of<ClothesProvider>(context, listen: false).color =
-        stringToColor(prenda.color);
-    Provider.of<ClothesProvider>(context, listen: false).date = prenda.date;
-    Provider.of<ClothesProvider>(context, listen: false).photoAsString =
-        prenda.image;
-    Provider.of<ClothesProvider>(context, listen: false).place = prenda.place;
-    Provider.of<ClothesProvider>(context, listen: false).size = prenda.size;
-    Provider.of<ClothesProvider>(context, listen: false).status = prenda.status;
-    Provider.of<ClothesProvider>(context, listen: false).store = prenda.store;
-    currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
-    currentCategory =
-        Provider.of<CategoryProvider>(context, listen: false).currentCategory;
-    _clothesRef =
-        FirebaseDatabase.instance.ref().child('$currentUser/$currentCategory');
+    context.read<ClothesProvider>().brand = prenda.brand;
+    context.read<ClothesProvider>().color = stringToColor(prenda.color);
+    context.read<ClothesProvider>().date = prenda.date;
+    context.read<ClothesProvider>().photoAsString = prenda.image;
+    context.read<ClothesProvider>().place = prenda.place;
+    context.read<ClothesProvider>().size = prenda.size;
+    context.read<ClothesProvider>().status = prenda.status;
+    context.read<ClothesProvider>().store = prenda.store;
+
+    if (prenda.image.isNotEmpty) amImodifying == true;
   }
 
   @override
   void initState() {
+    currentUser = context.read<UserProvider>().currentUser;
+    currentCategory = context.read<CategoryProvider>().currentCategory;
+    _clothesRef =
+        FirebaseDatabase.instance.ref().child('$currentUser/$currentCategory');
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       updateClothes(ModalRoute.of(context)!.settings.arguments as Clothes);
     });
@@ -62,12 +64,13 @@ class _ClothesFormState extends State<ClothesForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Add/Modify")),
+        appBar: AppBar(title: const Text("Add/Modify")),
         floatingActionButton: saveClothes(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
           child: Column(children: [
             categoryRow(),
+            const PhotoRow(),
             const BrandModelRow(),
             const StoreDatePlace()
           ]),
@@ -83,8 +86,8 @@ class _ClothesFormState extends State<ClothesForm> {
         TextButton(
           onPressed: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => CreateUser())),
-          child: Text(Provider.of<LocationProvider>(context, listen: false)
-              .currentLocation),
+          child: Text(Provider.of<CategoryProvider>(context, listen: false)
+              .currentCategory),
         )
       ],
     );
@@ -111,7 +114,7 @@ class _ClothesFormState extends State<ClothesForm> {
                   .store
                   .trim(),
               warranty: 0,
-              image: ''));
+              image: context.read<ClothesProvider>().photoAsString));
           Navigator.pop(context);
         },
         label: const Text("Save"),
@@ -119,10 +122,13 @@ class _ClothesFormState extends State<ClothesForm> {
   }
 
   String? guardarPrenda(Clothes prenda) {
-    DatabaseReference myRef = _clothesRef.push();
-    myRef.set(prenda.toJson());
-    return myRef.key;
+    if (!amImodifying) {
+      DatabaseReference myRef = _clothesRef.push();
+      myRef.set(prenda.toJson());
+      return myRef.key;
+    } else {}
+    return "";
   }
 
-  Query getMensajes() => _clothesRef;
+  Query getClothes() => _clothesRef;
 }

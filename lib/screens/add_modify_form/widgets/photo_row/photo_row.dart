@@ -12,20 +12,20 @@ import 'package:wardrobe/provider/clothes_provider.dart';
 import 'select_photo_options_screen.dart';
 
 class PhotoRow extends StatefulWidget {
+  const PhotoRow({super.key});
+
   @override
   State<StatefulWidget> createState() => _PhotoRowState();
 }
 
 class _PhotoRowState extends State<PhotoRow> {
-  String tapaAsStringBase64 = "";
+  String photoAsStringBase64 = "";
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      tapaAsStringBase64 =
-          Provider.of<ClothesProvider>(context, listen: false).photoAsString;
-    });
+    photoAsStringBase64 =
+        Provider.of<ClothesProvider>(context, listen: false).photoAsString;
   }
 
   @override
@@ -43,14 +43,14 @@ class _PhotoRowState extends State<PhotoRow> {
               color: Colors.grey.shade200,
             ),
             child: Center(
-              child: tapaAsStringBase64.isEmpty
+              child: photoAsStringBase64.isEmpty
                   ? const Text(
                       'No image selected',
                       style: TextStyle(fontSize: 20, color: Colors.black),
                     )
                   : CircleAvatar(
                       backgroundImage:
-                          MemoryImage(base64Decode(tapaAsStringBase64)),
+                          MemoryImage(base64Decode(photoAsStringBase64)),
                       radius: 200.0,
                     ),
             ),
@@ -122,10 +122,10 @@ class _PhotoRowState extends State<PhotoRow> {
       setState(() {
         imageFile = File(cropped.path);
 
-        tapaAsStringBase64 = base64Encode(imageFile.readAsBytesSync());
+        photoAsStringBase64 = base64Encode(imageFile.readAsBytesSync());
         Provider.of<ClothesProvider>(context, listen: false).photoAsString =
-            tapaAsStringBase64;
-        //print("tapaAsStringBase64: $tapaAsStringBase64");
+            photoAsStringBase64;
+        //print("photoAsStringBase64: $photoAsStringBase64");
         Navigator.of(context).pop();
       });
     }

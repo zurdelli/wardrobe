@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:wardrobe/data/categories_model.dart';
+import 'package:geocoding/geocoding.dart' as geocoding_package;
+import 'package:location/location.dart' as location_package;
 
 /// Translates color <-> string
 String colorToString(Color color) {
@@ -132,17 +133,6 @@ const List<String> categoriesListImages = <String>[
   'assets/images/trajes.png',
 ];
 
-List<CategoriesModel> categoriesList2 = <CategoriesModel>[
-  CategoriesModel(
-      tipo: 'Camisetas', image: Image.asset('assets/images/camisetas.png')),
-  CategoriesModel(
-      tipo: 'Sudaderas', image: Image.asset('assets/images/sudaderas.png')),
-  CategoriesModel(
-      tipo: 'Camisas', image: Image.asset('assets/images/camisas.png')),
-  CategoriesModel(
-      tipo: 'Pantalones', image: Image.asset('assets/images/pantalones.png')),
-];
-
 /// Abre un dialog con más informacion y una foto más grande
 showExpandedInfo(BuildContext context, String imageAsString) {
   showDialog(
@@ -165,6 +155,21 @@ showExpandedInfo(BuildContext context, String imageAsString) {
           ));
 }
 
+showFavoriteLocationsDialog(BuildContext context, String imageAsString) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) => BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            // ignore: prefer_const_constructors
+            child: AlertDialog(
+              //elevation: 10,
+              shape: LinearBorder(),
+              content: SizedBox(height: 250, width: 250, child: Center()),
+            ),
+          ));
+}
+
+/// Widget de apoyo para seleccionar colores
 Widget pickerLayoutBuilder(
     BuildContext context, List<Color> colors, PickerItem child) {
   Orientation orientation = MediaQuery.of(context).orientation;
@@ -183,6 +188,7 @@ Widget pickerLayoutBuilder(
   );
 }
 
+/// Widget de apoyo para seleccionar colores
 Widget pickerItemBuilder(
     Color color, bool isCurrentColor, void Function() changeColor) {
   return Container(
@@ -214,4 +220,42 @@ Widget pickerItemBuilder(
       ),
     ),
   );
+}
+
+/// Obtiene la ubicación automáticamente siempre que obtenga los permisos
+Future<String> getLocation() async {
+  location_package.Location location = location_package.Location();
+
+  bool serviceEnabled;
+  location_package.PermissionStatus permissionGranted;
+  location_package.LocationData locationData;
+
+  serviceEnabled = await location.serviceEnabled();
+  if (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
+    if (!serviceEnabled) {
+      return "";
+    }
+  }
+
+  permissionGranted = await location.hasPermission();
+  if (permissionGranted == location_package.PermissionStatus.denied) {
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != location_package.PermissionStatus.granted) {
+      return "";
+    }
+  }
+
+  locationData = await location.getLocation();
+
+  //print("La latitud es: ${locationData.latitude}");
+  double latitud = locationData.latitude ?? 0;
+  double longitud = locationData.longitude ?? 0;
+
+  List<geocoding_package.Placemark> placemarks =
+      await geocoding_package.placemarkFromCoordinates(latitud, longitud);
+
+  String place = "${placemarks[0].locality}, ${placemarks[0].country}";
+
+  return place;
 }
