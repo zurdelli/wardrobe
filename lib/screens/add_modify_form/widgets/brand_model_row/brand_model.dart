@@ -19,10 +19,8 @@ class _BrandModelRowState extends State<BrandModelRow> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      brand = context.read<ClothesProvider>().brand;
-      brandController.text = brand;
-    });
+    brand = context.read<ClothesProvider>().brand;
+    brandController.text = brand;
   }
 
   @override
@@ -34,13 +32,12 @@ class _BrandModelRowState extends State<BrandModelRow> {
         Expanded(
           flex: 3,
           child: TextFormField(
-            onTapOutside: (event) =>
-                Provider.of<ClothesProvider>(context, listen: false).brand =
-                    brandController.text.trim(),
+            onTapOutside: (event) => context.read<ClothesProvider>().brand =
+                brandController.text.trim(),
             controller: brandController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: 'Brand'),
+                border: OutlineInputBorder(), labelText: 'Marca'),
           ),
         ),
         const SizedBox(width: 5),
@@ -50,7 +47,7 @@ class _BrandModelRowState extends State<BrandModelRow> {
             //controller: brandController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: 'Model'),
+                border: OutlineInputBorder(), labelText: 'Modelo'),
           ),
         ),
       ],

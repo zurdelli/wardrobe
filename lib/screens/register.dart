@@ -11,7 +11,7 @@ class CreateUser extends StatefulWidget {
 }
 
 class CreateUserState extends State<CreateUser> {
-  late String email, passw;
+  late String email, passw, name;
   String error = "";
   final _formKey = GlobalKey<FormState>();
 
@@ -53,6 +53,7 @@ class CreateUserState extends State<CreateUser> {
             border:
                 OutlineInputBorder(borderRadius: new BorderRadius.circular(8))),
         keyboardType: TextInputType.emailAddress,
+        validator: (value) => value!.isEmpty ? "Campo obligatorio" : null,
         onSaved: (String? value) {
           email = value!;
         },
@@ -85,7 +86,7 @@ class CreateUserState extends State<CreateUser> {
                 }
               }
             },
-            child: Text("Login")),
+            child: Text("Create user")),
       );
 
   Future<UserCredential?> createUser(String email, String passw) async {
@@ -96,7 +97,7 @@ class CreateUserState extends State<CreateUser> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         setState(() {
-          error = "Usuario no encontrado";
+          error = "Email ya en uso";
         });
       }
       if (e.code == 'weak-password') {

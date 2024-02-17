@@ -10,6 +10,13 @@ class ClothesProvider extends ChangeNotifier {
   String _size = "";
   String _date = "";
   Color _color = Colors.transparent;
+  bool _hasBeenLent = false;
+
+  bool get hasBeenLent => _hasBeenLent;
+  set hasBeenLent(bool value) {
+    _hasBeenLent = value;
+    notifyListeners();
+  }
 
   String get photoAsString => _photoAsString;
   set photoAsString(String newValue) {

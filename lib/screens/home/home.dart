@@ -6,9 +6,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:provider/provider.dart';
-import 'package:wardrobe/data/clothes_dao.dart';
-import 'package:wardrobe/data/clothes_model.dart';
+import 'package:wardrobe/data/clothes/clothes_dao.dart';
+import 'package:wardrobe/data/clothes/clothes_model.dart';
 import 'package:wardrobe/provider/category_provider.dart';
+import 'package:wardrobe/provider/clothes_provider.dart';
 import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/login.dart';
@@ -51,15 +52,14 @@ class MyWardrobeState extends State<MyWardrobe> {
 
     query = FirebaseDatabase.instance
         .ref()
-        .child('$user/$categoria')
+        .child('clothes/$user/$categoria')
         .orderByChild('place')
         .equalTo(place);
 
     key = Key(DateTime.now().millisecondsSinceEpoch.toString());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CategoryProvider>(context, listen: false).currentCategory =
-          categoria;
+      context.read<CategoryProvider>().currentCategory = categoria;
     });
   }
 
@@ -75,8 +75,8 @@ class MyWardrobeState extends State<MyWardrobe> {
                 MaterialPageRoute(builder: (context) => LoginPage()),
                 (route) => false);
           },
-          child: Padding(
-            padding: const EdgeInsets.all(8),
+          child: const Padding(
+            padding: EdgeInsets.all(8),
             child: Icon(Icons.exit_to_app),
           ),
         ),
@@ -84,20 +84,15 @@ class MyWardrobeState extends State<MyWardrobe> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          Navigator.pushNamed(context, "/formclothes",
-                  arguments: Clothes(
-                      subcategory: '',
-                      brand: '',
-                      image: '',
-                      color: '',
-                      date: DateTime.now().toString(),
-                      place: '',
-                      size: '',
-                      status: '',
-                      store: '',
-                      warranty: 0))
-              // Necesario para el reload de la listview
-              .then((_) {});
+          context.read<ClothesProvider>().brand = "";
+          context.read<ClothesProvider>().color = stringToColor("Red");
+          context.read<ClothesProvider>().date = "";
+          context.read<ClothesProvider>().photoAsString = "";
+          context.read<ClothesProvider>().place = "";
+          context.read<ClothesProvider>().size = "";
+          context.read<ClothesProvider>().status = "";
+          context.read<ClothesProvider>().store = "";
+          Navigator.pushNamed(context, "/formclothes").then((_) {});
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -121,9 +116,7 @@ class MyWardrobeState extends State<MyWardrobe> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-              child: Text(
-                  "Hola, ${context.read<UserProvider>().currentUserName}!")),
+          Text("Hola, ${context.read<UserProvider>().currentUserName}!"),
           Text("Ubicación: $currentPlace"),
         ],
       ),
@@ -164,15 +157,13 @@ class MyWardrobeState extends State<MyWardrobe> {
       width: 150,
       height: 150,
       child: FirebaseAnimatedList(
-        //key: key,
-        //controller: _scrollController,
-        query: FirebaseDatabase.instance.ref().child('$user/Ubicaciones'),
+        query:
+            FirebaseDatabase.instance.ref().child('clothes/$user/Ubicaciones'),
         itemBuilder: (context, snapshot, animation, index) {
           final json = snapshot.value as Map<dynamic, dynamic>;
           final ubicacion = json['ubicacion'] as String;
           return TextButton(
               onPressed: () {
-                //context.read<LocationProvider>().currentLocation = ubicacion;
                 updateQuery(
                     categoriaLocal:
                         context.read<CategoryProvider>().currentCategory,
@@ -214,7 +205,7 @@ class MyWardrobeState extends State<MyWardrobe> {
                     onPressed: () {
                       DatabaseReference myRef = FirebaseDatabase.instance
                           .ref()
-                          .child('$user/Ubicaciones')
+                          .child('clothes/$user/Ubicaciones')
                           .push();
                       myRef.set(<String, String>{
                         'ubicacion': locationController.text
@@ -234,7 +225,7 @@ class MyWardrobeState extends State<MyWardrobe> {
       place = context.read<LocationProvider>().currentLocation = placeLocal;
       query = FirebaseDatabase.instance
           .ref()
-          .child('$user/$categoria')
+          .child('clothes/$user/$categoria')
           .orderByChild('place')
           .equalTo(place);
 
@@ -243,7 +234,7 @@ class MyWardrobeState extends State<MyWardrobe> {
   }
 
   Widget categoriesRow() {
-    return Container(
+    return SizedBox(
       height: 100,
       child: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -268,7 +259,6 @@ class MyWardrobeState extends State<MyWardrobe> {
           updateQuery(
               categoriaLocal: nombre,
               placeLocal: context.read<LocationProvider>().currentLocation);
-          //Navigator.pushNamed(context, '/listaWardrobe', arguments: query);
         },
         child: Column(
           children: [
@@ -318,8 +308,6 @@ class MyWardrobeState extends State<MyWardrobe> {
               )
             ]),
           ),
-          // Text(
-          //     "${context.read<CategoryProvider>().currentCategory} en ${context.read<LocationProvider>().currentLocation}"),
           const SizedBox(height: 15),
           Expanded(
               child: FirebaseAnimatedList(
@@ -330,7 +318,7 @@ class MyWardrobeState extends State<MyWardrobe> {
               final json = snapshot.value as Map<dynamic, dynamic>;
               final prenda = Clothes.fromJson(json);
               final nodeKey = snapshot.key;
-              return ClothesWidget(clothes: prenda);
+              return ClothesWidget(clothes: prenda, nodeKey: nodeKey);
             },
           )),
         ],

@@ -1,7 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wardrobe/data/clothes_model.dart';
+import 'package:wardrobe/data/clothes/clothes_dao.dart';
+import 'package:wardrobe/data/clothes/clothes_model.dart';
 import 'package:wardrobe/provider/category_provider.dart';
 import 'package:wardrobe/provider/clothes_provider.dart';
 import 'package:wardrobe/provider/location_provider.dart';
@@ -14,13 +15,14 @@ import 'package:wardrobe/utilities.dart';
 
 /// Representa el formulario para agregar/modificar alguna ropa
 /// Cada prenda debe tener, entre otra info:
+/// Una foto
 ///  Tienda/Lugar donde fue adquirida y la fecha
 /// Si está en garantía actualmente
-///  Lugar donde se encuentra actualmente
-///  Tipo (jerséis, chaquetas, pantalones, etc)
-///  Color
+/// Lugar donde se encuentra actualmente
+/// Categoría (jerséis, chaquetas, pantalones, etc)
+/// Color
 /// Estado ( Nuevo/ Bueno/ Regular)
-/// En caso de haber sido prestada, usuario actual
+/// Si ha sido prestada y el usuario actual que la tiene
 
 class ClothesForm extends StatefulWidget {
   const ClothesForm({super.key});
@@ -30,34 +32,22 @@ class ClothesForm extends StatefulWidget {
 }
 
 class _ClothesFormState extends State<ClothesForm> {
-  late Clothes clothes;
   String currentUser = "", currentCategory = "";
   late DatabaseReference _clothesRef;
-  bool amImodifying = false;
-
-  updateClothes(Clothes prenda) {
-    context.read<ClothesProvider>().brand = prenda.brand;
-    context.read<ClothesProvider>().color = stringToColor(prenda.color);
-    context.read<ClothesProvider>().date = prenda.date;
-    context.read<ClothesProvider>().photoAsString = prenda.image;
-    context.read<ClothesProvider>().place = prenda.place;
-    context.read<ClothesProvider>().size = prenda.size;
-    context.read<ClothesProvider>().status = prenda.status;
-    context.read<ClothesProvider>().store = prenda.store;
-
-    if (prenda.image.isNotEmpty) amImodifying == true;
-  }
+  String nodeKey = "";
 
   @override
   void initState() {
     currentUser = context.read<UserProvider>().currentUser;
     currentCategory = context.read<CategoryProvider>().currentCategory;
-    _clothesRef =
-        FirebaseDatabase.instance.ref().child('$currentUser/$currentCategory');
+    _clothesRef = FirebaseDatabase.instance
+        .ref()
+        .child('clothes/$currentUser/$currentCategory');
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      updateClothes(ModalRoute.of(context)!.settings.arguments as Clothes);
+      nodeKey = ModalRoute.of(context)!.settings.arguments.toString();
+      print(nodeKey);
     });
   }
 
@@ -96,39 +86,26 @@ class _ClothesFormState extends State<ClothesForm> {
   Widget saveClothes() {
     return FloatingActionButton.extended(
         onPressed: () {
-          guardarPrenda(Clothes(
-              subcategory: 'camisetas deportivas',
-              brand: Provider.of<ClothesProvider>(context, listen: false)
-                  .brand
-                  .trim(),
-              color: 'black',
-              status: 'new',
-              size: 'L',
-              place: Provider.of<ClothesProvider>(context, listen: false)
-                  .place
-                  .trim(),
-              date: Provider.of<ClothesProvider>(context, listen: false)
-                  .date
-                  .trim(),
-              store: Provider.of<ClothesProvider>(context, listen: false)
-                  .store
-                  .trim(),
-              warranty: 0,
-              image: context.read<ClothesProvider>().photoAsString));
+          ClothesDAO().guardarClothes(
+              Clothes(
+                  subcategory: 'camisetas deportivas',
+                  brand: context.read<ClothesProvider>().brand,
+                  color: 'black',
+                  status: 'new',
+                  size: 'L',
+                  place: context.read<ClothesProvider>().place,
+                  date: context.read<ClothesProvider>().date,
+                  store: context.read<ClothesProvider>().store,
+                  warranty: 0,
+                  image: context.read<ClothesProvider>().photoAsString,
+                  hasBeenLent: false),
+              _clothesRef,
+              currentUser,
+              currentCategory,
+              nodeKey);
           Navigator.pop(context);
         },
         label: const Text("Save"),
         icon: const Icon(Icons.save));
   }
-
-  String? guardarPrenda(Clothes prenda) {
-    if (!amImodifying) {
-      DatabaseReference myRef = _clothesRef.push();
-      myRef.set(prenda.toJson());
-      return myRef.key;
-    } else {}
-    return "";
-  }
-
-  Query getClothes() => _clothesRef;
 }

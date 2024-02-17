@@ -26,7 +26,9 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       store = context.read<ClothesProvider>().store;
-      date = context.read<ClothesProvider>().date;
+      date = context.read<ClothesProvider>().date.isEmpty
+          ? DateFormat('dd-MM-yyyy').format(DateTime.now())
+          : context.read<ClothesProvider>().date;
       place = context.read<ClothesProvider>().place;
 
       storeController.text = store;
@@ -37,34 +39,46 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      // store & date row
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 5,
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: storeController,
+                onTapOutside: (event) =>
+                    Provider.of<ClothesProvider>(context, listen: false).store =
+                        storeController.text.trim(),
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.store),
+                  labelText: 'Tienda',
+                ),
               ),
-              TextField(
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: TextField(
                 controller: dateController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.calendar_today),
-                    labelText: "Date"),
+                    labelText: "Fecha"),
                 readOnly: true,
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      initialDate:
-                          DateTime.parse(context.read<ClothesProvider>().date),
+                      initialDate: DateTime.parse(toEnglishDate(date)),
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now());
                   if (pickedDate != null) {
                     String formattedDate =
-                        DateFormat('yyyy-MM-dd').format(pickedDate);
+                        DateFormat('dd-MM-yyyy').format(pickedDate);
                     setState(() {
                       dateController.text = formattedDate;
                       Provider.of<ClothesProvider>(context, listen: false)
@@ -73,10 +87,11 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
                   }
                 },
               ),
-              SizedBox(
-                height: 10,
-              ),
-              TextField(
+            ),
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 3,
+              child: TextField(
                 controller: placeController,
                 onTapOutside: (event) =>
                     Provider.of<ClothesProvider>(context, listen: false).place =
@@ -93,15 +108,18 @@ class _StoreDatePlaceState extends State<StoreDatePlace> {
                       getLocation();
                     },
                   ),
-                  labelText: 'Place',
+                  labelText: 'Donde fue adquirida',
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
   }
+
+  String toEnglishDate(String spanishDate) =>
+      "${spanishDate.substring(6, 10)}-${spanishDate.substring(3, 5)}-${spanishDate.substring(0, 2)}";
 
   /// Obtiene el lugar actual donde se encuentra el usuario a través del paquete
   /// location.

@@ -1,21 +1,29 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:wardrobe/data/clothes_dao.dart';
-import 'package:wardrobe/data/clothes_model.dart';
+import 'package:provider/provider.dart';
+import 'package:wardrobe/data/clothes/clothes_dao.dart';
+import 'package:wardrobe/data/clothes/clothes_model.dart';
+import 'package:wardrobe/provider/category_provider.dart';
+import 'package:wardrobe/provider/clothes_provider.dart';
+import 'package:wardrobe/provider/user_provider.dart';
+import 'package:wardrobe/utilities.dart';
 
-/// Representa al widget mostrado en la home donde se visualiza cada prenda por
+/// Representa al widget mostrado en la home donde se visualiza cada clothes por
 /// separado
 class ClothesWidget extends StatelessWidget {
   final Clothes clothes;
-  //final String? nodeKey;
+  final String? nodeKey;
   //final String marca, fecha, imagen;
 
   //String? messagekey;
 
-  const ClothesWidget({super.key, required this.clothes});
+  const ClothesWidget(
+      {super.key, required this.clothes, required this.nodeKey});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +63,9 @@ class ClothesWidget extends StatelessWidget {
                       Align(
                         alignment: Alignment.bottomLeft,
                         child: Text(
-                          clothes.date.substring(0, 10),
+                          clothes.date.length > 10
+                              ? clothes.date.substring(0, 10)
+                              : "",
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -100,19 +110,15 @@ class ClothesWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   IconButton(
-                    onPressed: () => Navigator.pushNamed(
-                            context, "/formclothes",
-                            arguments: clothes)
-                        // Necesario para el reload de la listview
-                        .then((_) {}),
+                    onPressed: () => modifyClothes(context),
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () => deleteClothes(context),
                     icon: const Icon(Icons.delete),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () => modalToBorrowClothes(context),
                     icon: const Icon(Icons.swap_horizontal_circle_rounded),
                   ),
                   IconButton(
@@ -129,8 +135,141 @@ class ClothesWidget extends StatelessWidget {
   }
 
   modifyClothes(BuildContext context) {
-    Navigator.pushNamed(context, "/formclothes", arguments: clothes)
-        // Necesario para el reload de la listview
+    context.read<ClothesProvider>().brand = clothes.brand;
+    context.read<ClothesProvider>().color = stringToColor(clothes.color);
+    context.read<ClothesProvider>().date = clothes.date;
+    context.read<ClothesProvider>().photoAsString = clothes.image;
+    context.read<ClothesProvider>().place = clothes.place;
+    context.read<ClothesProvider>().size = clothes.size;
+    context.read<ClothesProvider>().status = clothes.status;
+    context.read<ClothesProvider>().store = clothes.store;
+
+    Navigator.popAndPushNamed(context, "/formclothes", arguments: nodeKey)
         .then((_) {});
+  }
+
+  deleteClothes(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        // ignore: prefer_const_constructors
+        child: AlertDialog(
+          title: const Text("¿Eliminar?"),
+          shape: LinearBorder(),
+          actions: <Widget>[
+            TextButton(
+                child: const Text('Eliminar'),
+                onPressed: () {
+                  ClothesDAO().deleteClothes(
+                      userid: context.read<UserProvider>().currentUser,
+                      category:
+                          context.read<CategoryProvider>().currentCategory,
+                      clothesid: nodeKey ?? "");
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                }),
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  modalToBorrowClothes(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        enableDrag: true,
+        //isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(25.0),
+          ),
+        ),
+        builder: (context) => DraggableScrollableSheet(
+            initialChildSize: 0.8,
+            maxChildSize: 1,
+            minChildSize: 0.28,
+            expand: false,
+            builder: ((context, scrollController) => Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text("A un usuario de la app"),
+                    FirebaseAnimatedList(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      query: FirebaseDatabase.instance.ref().child('users'),
+                      itemBuilder: (context, snapshot, animation, index) {
+                        final json = snapshot.value as Map<dynamic, dynamic>;
+                        final email = json['email'] as String;
+                        final userID = json['id'] as String;
+                        // Verifica si el id del nodo al que está accediendo en la
+                        //base de datos es el mismo que está en la aplicacion actualmente
+                        //entonces no lo muestra ya que no se puede prestar la ropa a uno
+                        //mismo. Tambien recupera el email que será la forma de mostrar el
+                        //usuario a quien se prestará la ropa
+                        return userID !=
+                                context.read<UserProvider>().currentUser
+                            ? TextButton(
+                                onPressed: () {
+                                  dialogToConfirmBorrowClothes(
+                                      context, userID, email);
+                                },
+                                child: Text(email))
+                            : Container(
+                                height: 0,
+                              );
+                      },
+                    ),
+                    Divider(),
+                    TextButton(
+                        onPressed: () {
+                          dialogToConfirmBorrowClothes(
+                              context, "", "otra persona");
+                        },
+                        //helperPrestarClothes(context, "otra persona"),
+                        child: const Text("Otra persona"))
+                  ],
+                )))));
+  }
+
+  dialogToConfirmBorrowClothes(
+      BuildContext context, String userID, String userEmail) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        // ignore: prefer_const_constructors
+        child: AlertDialog(
+          title: const Text("Prestar"),
+          shape: LinearBorder(),
+          content: Text("¿Está seguro de querer prestar esto a $userEmail"),
+          actions: <Widget>[
+            TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.of(context).pop()),
+            TextButton(
+                child: const Text('Aceptar'),
+                onPressed: () {
+                  ClothesDAO().lentToFromSomeFriend(
+                      borrowed: true,
+                      category:
+                          context.read<CategoryProvider>().currentCategory,
+                      clothesid: nodeKey ?? "",
+                      toWhomeID: userID,
+                      userid: context.read<UserProvider>().currentUser);
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                }),
+          ],
+        ),
+      ),
+    );
   }
 }
