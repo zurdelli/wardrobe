@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/data/clothes/clothes_dao.dart';
 import 'package:wardrobe/data/clothes/clothes_model.dart';
@@ -19,10 +20,7 @@ import 'package:wardrobe/screens/home/widgets/clothes_widget.dart';
 /// Representa la pantalla general, aqui sera un vistazo general de las prendas
 /// de ropa que tenga un usuario junto a su ubicacion
 class MyWardrobe extends StatefulWidget {
-  MyWardrobe({Key? key}) : super(key: key);
-
-  //final mensajeDAO = MensajeDAO();
-  final clothesDAO = ClothesDAO();
+  const MyWardrobe({Key? key}) : super(key: key);
 
   @override
   MyWardrobeState createState() => MyWardrobeState();
@@ -31,13 +29,11 @@ class MyWardrobe extends StatefulWidget {
 class MyWardrobeState extends State<MyWardrobe> {
   // Para saber si he llegado al final del screen
   final ScrollController _scrollController = ScrollController();
+  int cantidad = 0;
 
-  String categoria = "",
-      user = "",
-      userName = "",
-      place = "",
-      currentPlace = "";
+  String categoria = "", user = "", userName = "", place = "";
   var query;
+  var dbReference;
   var key;
 
   @override
@@ -45,21 +41,22 @@ class MyWardrobeState extends State<MyWardrobe> {
     super.initState();
 
     categoria = "Camisetas";
-    user = context.read<UserProvider>().currentUser;
-    userName = context.read<UserProvider>().currentUserName;
-    currentPlace = context.read<LocationProvider>().currentLocation;
-    place = currentPlace;
-
-    query = FirebaseDatabase.instance
-        .ref()
-        .child('clothes/$user/$categoria')
-        .orderByChild('place')
-        .equalTo(place);
-
+    user = FirebaseAuth.instance.currentUser?.uid ?? "";
+    userName = FirebaseAuth.instance.currentUser?.displayName ?? "";
+    cantidad = 0;
     key = Key(DateTime.now().millisecondsSinceEpoch.toString());
+    dbReference =
+        FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
+    query = dbReference.orderByChild('place').equalTo(place);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryProvider>().currentCategory = categoria;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      var myPlace = await getLocation();
+      setState(() {
+        place = myPlace;
+        context.read<LocationProvider>().currentLocation = place;
+        context.read<CategoryProvider>().currentCategory = categoria;
+        updateQuery(categoriaLocal: categoria, placeLocal: place);
+      });
     });
   }
 
@@ -72,7 +69,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             FirebaseAuth.instance.signOut();
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
+                MaterialPageRoute(builder: (context) => const LoginPage()),
                 (route) => false);
           },
           child: const Padding(
@@ -86,12 +83,18 @@ class MyWardrobeState extends State<MyWardrobe> {
         onPressed: () {
           context.read<ClothesProvider>().brand = "";
           context.read<ClothesProvider>().color = stringToColor("Red");
-          context.read<ClothesProvider>().date = "";
-          context.read<ClothesProvider>().photoAsString = "";
+          context.read<ClothesProvider>().date =
+              DateFormat('dd-MM-yyyy').format(DateTime.now());
+          context.read<ClothesProvider>().hasBeenLent = false;
+          context.read<ClothesProvider>().holder = "";
+          context.read<ClothesProvider>().image = "";
+          context.read<ClothesProvider>().owner = "";
           context.read<ClothesProvider>().place = "";
           context.read<ClothesProvider>().size = "";
-          context.read<ClothesProvider>().status = "";
+          //context.read<ClothesProvider>().status = "";
           context.read<ClothesProvider>().store = "";
+          context.read<ClothesProvider>().sublocation = "";
+          context.read<ClothesProvider>().warranty = "";
           Navigator.pushNamed(context, "/formclothes").then((_) {});
         },
       ),
@@ -116,8 +119,8 @@ class MyWardrobeState extends State<MyWardrobe> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Hola, ${context.read<UserProvider>().currentUserName}!"),
-          Text("Ubicación: $currentPlace"),
+          Text("Hola, $userName!"),
+          Text(" estás en: $place"),
         ],
       ),
     );
@@ -137,7 +140,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             TextButton(
               child: const Text('Añadir'),
               onPressed: () {
-                addLocation();
+                addOrEditLocation("", "");
               },
             ),
             TextButton(
@@ -162,23 +165,30 @@ class MyWardrobeState extends State<MyWardrobe> {
         itemBuilder: (context, snapshot, animation, index) {
           final json = snapshot.value as Map<dynamic, dynamic>;
           final ubicacion = json['ubicacion'] as String;
-          return TextButton(
-              onPressed: () {
-                updateQuery(
-                    categoriaLocal:
-                        context.read<CategoryProvider>().currentCategory,
-                    placeLocal: ubicacion);
-
-                Navigator.of(context).pop();
-              },
-              child: Text(ubicacion));
+          final key = snapshot.key;
+          return SubmenuButton(menuChildren: [
+            TextButton(
+                onPressed: () {
+                  updateQuery(
+                      categoriaLocal:
+                          context.read<CategoryProvider>().currentCategory,
+                      placeLocal: ubicacion);
+                  Navigator.of(context).pop();
+                },
+                child: Text("Seleccionar")),
+            TextButton(
+                onPressed: () => addOrEditLocation(ubicacion, key!),
+                child: Text("Editar")),
+            TextButton(onPressed: () {}, child: Text("Borrar")),
+          ], child: Text(ubicacion));
         },
       ),
     );
   }
 
-  addLocation() {
+  addOrEditLocation(String location, String key) {
     TextEditingController locationController = TextEditingController();
+    locationController.text = location;
     showDialog(
         context: context,
         builder: (BuildContext context) => BackdropFilter(
@@ -201,15 +211,27 @@ class MyWardrobeState extends State<MyWardrobe> {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: const Text('Añadir'),
+                    child: const Text('Aceptar'),
                     onPressed: () {
-                      DatabaseReference myRef = FirebaseDatabase.instance
-                          .ref()
-                          .child('clothes/$user/Ubicaciones')
-                          .push();
+                      DatabaseReference myRef;
+                      if (location.isEmpty) {
+                        myRef = FirebaseDatabase.instance
+                            .ref()
+                            .child('clothes/$user/Ubicaciones')
+                            .push();
+                      } else {
+                        myRef = FirebaseDatabase.instance
+                            .ref()
+                            .child('clothes/$user/Ubicaciones/$key');
+                      }
                       myRef.set(<String, String>{
                         'ubicacion': locationController.text
                       });
+                      updateQuery(
+                          categoriaLocal:
+                              context.read<CategoryProvider>().currentCategory,
+                          placeLocal: locationController.text);
+                      Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     },
                   ),
@@ -223,12 +245,10 @@ class MyWardrobeState extends State<MyWardrobe> {
       categoria =
           context.read<CategoryProvider>().currentCategory = categoriaLocal;
       place = context.read<LocationProvider>().currentLocation = placeLocal;
-      query = FirebaseDatabase.instance
-          .ref()
-          .child('clothes/$user/$categoria')
-          .orderByChild('place')
-          .equalTo(place);
-
+      dbReference =
+          FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
+      query = dbReference.orderByChild('place').equalTo(place);
+      countChildren(dbReference);
       key = Key(DateTime.now().millisecondsSinceEpoch.toString());
     });
   }
@@ -298,7 +318,7 @@ class MyWardrobeState extends State<MyWardrobe> {
       child: Column(
         children: [
           Text.rich(
-            TextSpan(text: "$categoria en ", children: [
+            TextSpan(text: "$cantidad $categoria en ", children: [
               TextSpan(
                 text: context.read<LocationProvider>().currentLocation,
                 recognizer: TapGestureRecognizer()
@@ -324,5 +344,12 @@ class MyWardrobeState extends State<MyWardrobe> {
         ],
       ),
     );
+  }
+
+  /// Cuenta el numero de hijos de un nodo, para contar la cantidad de ropa
+  countChildren(DatabaseReference fromPath) async {
+    final event = await fromPath.once(DatabaseEventType.value);
+    int length = event.snapshot.children.length;
+    setState(() => cantidad = length);
   }
 }

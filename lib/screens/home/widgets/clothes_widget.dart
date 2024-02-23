@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/data/clothes/clothes_dao.dart';
 import 'package:wardrobe/data/clothes/clothes_model.dart';
@@ -18,9 +17,6 @@ import 'package:wardrobe/utilities.dart';
 class ClothesWidget extends StatelessWidget {
   final Clothes clothes;
   final String? nodeKey;
-  //final String marca, fecha, imagen;
-
-  //String? messagekey;
 
   const ClothesWidget(
       {super.key, required this.clothes, required this.nodeKey});
@@ -55,20 +51,38 @@ class ClothesWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(clothes.brand)),
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Text("Estado: Muy bueno")),
-                      Align(
-                        alignment: Alignment.bottomLeft,
+                        alignment: Alignment.topLeft,
                         child: Text(
-                          clothes.date.length > 10
-                              ? clothes.date.substring(0, 10)
-                              : "",
+                          clothes.date,
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Text.rich(
+                          TextSpan(
+                            text: "${clothes.brand} ",
+                            style: const TextStyle(color: Colors.black),
+                            children: [
+                              WidgetSpan(
+                                  alignment: PlaceholderAlignment.baseline,
+                                  baseline: TextBaseline.alphabetic,
+                                  child: CircleAvatar(
+                                      maxRadius: 5,
+                                      backgroundColor:
+                                          stringToColor(clothes.color))),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Align(alignment: Alignment.topLeft, child: Text("")),
+                      Offstage(
+                        offstage: clothes.warranty.isEmpty,
+                        child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                                "Con garantía hasta el ${clothes.warranty}")),
+                      )
                     ],
                   ),
                 ),
@@ -93,7 +107,11 @@ class ClothesWidget extends StatelessWidget {
               Container(
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
-                child: Image.memory(
+                child:
+                    // FadeInImage.assetNetwork(
+                    //     placeholder: 'assets/clothes.jpg', image: clothes.image)
+
+                    Image.memory(
                   base64Decode(clothes.image),
                   //radius: 250,
                 ),
@@ -138,11 +156,16 @@ class ClothesWidget extends StatelessWidget {
     context.read<ClothesProvider>().brand = clothes.brand;
     context.read<ClothesProvider>().color = stringToColor(clothes.color);
     context.read<ClothesProvider>().date = clothes.date;
-    context.read<ClothesProvider>().photoAsString = clothes.image;
+    context.read<ClothesProvider>().hasBeenLent = clothes.hasBeenLent;
+    context.read<ClothesProvider>().holder = clothes.holder;
+    context.read<ClothesProvider>().image = clothes.image;
+    context.read<ClothesProvider>().owner = clothes.owner;
     context.read<ClothesProvider>().place = clothes.place;
     context.read<ClothesProvider>().size = clothes.size;
-    context.read<ClothesProvider>().status = clothes.status;
+    //context.read<ClothesProvider>().status = clothes.status;
     context.read<ClothesProvider>().store = clothes.store;
+    context.read<ClothesProvider>().sublocation = clothes.sublocation;
+    context.read<ClothesProvider>().warranty = clothes.warranty;
 
     Navigator.popAndPushNamed(context, "/formclothes", arguments: nodeKey)
         .then((_) {});
@@ -263,7 +286,8 @@ class ClothesWidget extends StatelessWidget {
                           context.read<CategoryProvider>().currentCategory,
                       clothesid: nodeKey ?? "",
                       toWhomeID: userID,
-                      userid: context.read<UserProvider>().currentUser);
+                      userid: context.read<UserProvider>().currentUser,
+                      toWhomeEmail: userEmail);
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 }),

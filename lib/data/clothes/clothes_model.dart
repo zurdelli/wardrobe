@@ -1,25 +1,24 @@
 /// Representa al model del Clothes
 class Clothes {
-  final String date;
-  //final String category;
-  final String subcategory;
-  final String status;
-  final String color;
   final String brand;
-  final String size;
-  final String place;
-  final String store;
-  final int warranty;
-  final String image;
-
+  final String color;
+  final String date;
   final bool hasBeenLent;
-  //late String friendWhoHasBeenBorrowed;
+  final String holder;
+  final String image;
+  final String owner;
+  final String place;
+  final String size;
+  //final String status;
+  final String store;
+  final String sublocation;
+  final String warranty;
 
   Clothes({
-    required this.subcategory,
+    required this.sublocation,
     required this.brand,
     required this.color,
-    required this.status,
+    //required this.status,
     required this.size,
     required this.place,
     required this.date,
@@ -27,27 +26,31 @@ class Clothes {
     required this.warranty,
     required this.image,
     required this.hasBeenLent,
+    required this.owner,
+    required this.holder,
   });
 
   /// Recibe un json y lo convierte a datos de las prendas
   Clothes.fromJson(Map<dynamic, dynamic> json)
-      : subcategory = json['subcategory'] as String,
+      : sublocation = json['sublocation'] as String,
         brand = json['brand'] as String,
         color = json['color'] as String,
-        status = json['status'] as String,
+        //status = json['status'] as String,
         size = json['size'] as String,
         place = json['place'] as String,
         date = json['date'] as String,
         store = json['store'] as String,
-        warranty = json['warranty'] as int,
+        warranty = json['warranty'] as String,
         image = json['image'] as String,
-        hasBeenLent = json['hasBeenLent'] as bool;
+        hasBeenLent = json['hasBeenLent'] as bool,
+        owner = json['owner'] as String,
+        holder = json['holder'] as String;
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
-        'subcategory': subcategory,
+        'sublocation': sublocation,
         'brand': brand,
         'color': color,
-        'status': status,
+        //'status': status,
         'size': size,
         'place': place,
         'date': date,
@@ -55,5 +58,7 @@ class Clothes {
         'warranty': warranty,
         'image': image,
         'hasBeenLent': hasBeenLent,
+        'owner': owner,
+        'holder': holder,
       };
 }

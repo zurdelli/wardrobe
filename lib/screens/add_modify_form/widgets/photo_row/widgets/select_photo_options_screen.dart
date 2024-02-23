@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:wardrobe/screens/add_modify_form/widgets/photo_row/re_usable_select_photo_button.dart';
+import 'package:wardrobe/screens/add_modify_form/widgets/photo_row/widgets/re_usable_select_photo_button.dart';
 
 /// Clase que representa la ventana modal que se abre cuando damos a crear imagen
 class SelectPhotoOptionsScreen extends StatelessWidget {

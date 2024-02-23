@@ -17,13 +17,13 @@ class _ColorsRowState extends State<ColorsRow> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _color = Provider.of<ClothesProvider>(context, listen: false).color;
+      _color = context.read<ClothesProvider>().color;
     });
   }
 
   void setcolor(Color newColor) => setState(() {
         _color = newColor;
-        Provider.of<ClothesProvider>(context, listen: false).color = _color;
+        context.read<ClothesProvider>().color = _color;
       });
 
   @override
@@ -83,7 +83,7 @@ class _ColorsRowState extends State<ColorsRow> {
                   WidgetSpan(child: Icon(Icons.color_lens)),
                   TextSpan(
                       text: colorToString(_color).isEmpty
-                          ? '1st color'
+                          ? 'Color'
                           : colorToString(_color))
                 ],
               ),

@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'package:wardrobe/provider/clothes_provider.dart';
 
-import 'select_photo_options_screen.dart';
+import 'widgets/select_photo_options_screen.dart';
 
 class PhotoRow extends StatefulWidget {
   const PhotoRow({super.key});
@@ -19,13 +19,12 @@ class PhotoRow extends StatefulWidget {
 }
 
 class _PhotoRowState extends State<PhotoRow> {
-  String photoAsStringBase64 = "";
+  String imageBase64 = "";
 
   @override
   void initState() {
     super.initState();
-    photoAsStringBase64 =
-        Provider.of<ClothesProvider>(context, listen: false).photoAsString;
+    imageBase64 = Provider.of<ClothesProvider>(context, listen: false).image;
   }
 
   @override
@@ -43,14 +42,13 @@ class _PhotoRowState extends State<PhotoRow> {
               color: Colors.grey.shade200,
             ),
             child: Center(
-              child: photoAsStringBase64.isEmpty
+              child: imageBase64.isEmpty
                   ? const Text(
                       'No image selected',
                       style: TextStyle(fontSize: 20, color: Colors.black),
                     )
                   : CircleAvatar(
-                      backgroundImage:
-                          MemoryImage(base64Decode(photoAsStringBase64)),
+                      backgroundImage: MemoryImage(base64Decode(imageBase64)),
                       radius: 200.0,
                     ),
             ),
@@ -122,10 +120,10 @@ class _PhotoRowState extends State<PhotoRow> {
       setState(() {
         imageFile = File(cropped.path);
 
-        photoAsStringBase64 = base64Encode(imageFile.readAsBytesSync());
-        Provider.of<ClothesProvider>(context, listen: false).photoAsString =
-            photoAsStringBase64;
-        //print("photoAsStringBase64: $photoAsStringBase64");
+        imageBase64 = base64Encode(imageFile.readAsBytesSync());
+        Provider.of<ClothesProvider>(context, listen: false).image =
+            imageBase64;
+        //print("imageBase64: $imageBase64");
         Navigator.of(context).pop();
       });
     }

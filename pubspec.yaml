@@ -38,6 +38,7 @@ dependencies:
   firebase_core: ^2.20.0
   firebase_database:
   firebase_auth: 
+  firebase_storage: 
   intl: ^0.18.1
   image_cropper: 
   image_picker: 
@@ -47,6 +48,7 @@ dependencies:
   flutter_colorpicker: 
   google_sign_in: 
   flutter_signin_button: 
+  toggle_switch: ^2.1.0
 
 dev_dependencies:
   flutter_test:

@@ -20,20 +20,28 @@ class ClothesDAO {
     return myRef.key;
   }
 
+  /// Delete clothess
+  deleteClothes(
+          {required String category,
+          required String userid,
+          required String clothesid}) =>
+      _singleClothesRef(userid, category).child(clothesid).remove();
+
   /// Si una prenda es prestada a un amigo
   lentToFromSomeFriend(
       {required String toWhomeID,
       required bool borrowed,
       required String userid,
       required String clothesid,
-      required String category}) {
+      required String category,
+      required String toWhomeEmail}) {
     // hasbeenLent: true
     FirebaseDatabase.instance
         .ref()
         .child('clothes/$userid/$category/$clothesid')
-        .update({"hasBeenLent": borrowed});
+        .update({"hasBeenLent": borrowed, "holder": toWhomeEmail});
 
-    /// Si el usuario de destino es un usuario de la app, copia el nodo de esa prenda
+    /// Si el usuario de destino es un usuario de la app, copia esa prenda
     /// al otro usuario
     if (toWhomeID.isNotEmpty) {
       DatabaseReference fromPath = FirebaseDatabase.instance
@@ -55,10 +63,9 @@ class ClothesDAO {
     }
   }
 
-  /// Delete clothess
-  deleteClothes(
-          {required String category,
-          required String userid,
-          required String clothesid}) =>
-      _singleClothesRef(userid, category).child(clothesid).remove();
+  /// Cuenta el numero de hijos de un nodo, para contar la cantidad de ropa
+  Future<int> countChildren(DatabaseReference fromPath) async {
+    final event = await fromPath.once(DatabaseEventType.value);
+    return event.snapshot.children.length;
+  }
 }

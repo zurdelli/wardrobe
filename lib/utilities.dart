@@ -133,40 +133,40 @@ const List<String> categoriesListImages = <String>[
   'assets/images/trajes.png',
 ];
 
-/// Abre un dialog con más informacion y una foto más grande
-showExpandedInfo(BuildContext context, String imageAsString) {
+/// Constituye un propio mensaje de dialog asi no se tiene que estar escribiendo constantemente
+myDialog(
+    BuildContext context, String titulo, Widget content, Function() onPressed) {
   showDialog(
-      context: context,
-      builder: (BuildContext context) => BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: AlertDialog(
-              //elevation: 10,
-              shape: CircleBorder(),
-              content: SizedBox(
-                  height: 250,
-                  width: 250,
-                  child: Center(
-                    child: CircleAvatar(
-                      backgroundImage: MemoryImage(base64Decode(imageAsString)),
-                      radius: 200.0,
-                    ),
-                  )),
-            ),
-          ));
+    context: context,
+    builder: (BuildContext context) => BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      // ignore: prefer_const_constructors
+      child: AlertDialog(
+        title: Text(titulo),
+        shape: LinearBorder(),
+        content: content,
+        actions: <Widget>[
+          TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop()),
+          TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () {
+                onPressed();
+                Navigator.of(context).pop();
+              }),
+        ],
+      ),
+    ),
+  );
 }
 
-showFavoriteLocationsDialog(BuildContext context, String imageAsString) {
-  showDialog(
-      context: context,
-      builder: (BuildContext context) => BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            // ignore: prefer_const_constructors
-            child: AlertDialog(
-              //elevation: 10,
-              shape: LinearBorder(),
-              content: SizedBox(height: 250, width: 250, child: Center()),
-            ),
-          ));
+mySnackBar(BuildContext context, String content) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(content),
+    showCloseIcon: true,
+    duration: const Duration(seconds: 3),
+  ));
 }
 
 /// Widget de apoyo para seleccionar colores
