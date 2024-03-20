@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:wardrobe/data/clothes/clothes_dao.dart';
 import 'package:wardrobe/data/clothes/clothes_model.dart';
 import 'package:wardrobe/provider/category_provider.dart';
 import 'package:wardrobe/provider/clothes_provider.dart';
@@ -31,7 +30,11 @@ class MyWardrobeState extends State<MyWardrobe> {
   final ScrollController _scrollController = ScrollController();
   int cantidad = 0;
 
-  String categoria = "", user = "", userName = "", place = "";
+  String categoria = "",
+      user = "",
+      userName = "",
+      currentPlace = "",
+      selectedPlace = "";
   var query;
   var dbReference;
   var key;
@@ -39,23 +42,23 @@ class MyWardrobeState extends State<MyWardrobe> {
   @override
   void initState() {
     super.initState();
-
+    cantidad = 0;
+    key = Key(DateTime.now().millisecondsSinceEpoch.toString());
     categoria = "Camisetas";
     user = FirebaseAuth.instance.currentUser?.uid ?? "";
     userName = FirebaseAuth.instance.currentUser?.displayName ?? "";
-    cantidad = 0;
-    key = Key(DateTime.now().millisecondsSinceEpoch.toString());
     dbReference =
         FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
-    query = dbReference.orderByChild('place').equalTo(place);
+    query = dbReference.orderByChild('place').equalTo(currentPlace);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      var myPlace = await getLocation();
+      currentPlace = await getLocation();
       setState(() {
-        place = myPlace;
-        context.read<LocationProvider>().currentLocation = place;
+        selectedPlace = currentPlace;
+        context.read<UserProvider>().currentUser = user;
+        context.read<LocationProvider>().currentLocation = currentPlace;
         context.read<CategoryProvider>().currentCategory = categoria;
-        updateQuery(categoriaLocal: categoria, placeLocal: place);
+        updateQuery(categoriaLocal: categoria, placeLocal: currentPlace);
       });
     });
   }
@@ -82,7 +85,7 @@ class MyWardrobeState extends State<MyWardrobe> {
         child: const Icon(Icons.add),
         onPressed: () {
           context.read<ClothesProvider>().brand = "";
-          context.read<ClothesProvider>().color = stringToColor("Red");
+          context.read<ClothesProvider>().color = stringToColor("Transparent");
           context.read<ClothesProvider>().date =
               DateFormat('dd-MM-yyyy').format(DateTime.now());
           context.read<ClothesProvider>().hasBeenLent = false;
@@ -120,69 +123,184 @@ class MyWardrobeState extends State<MyWardrobe> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text("Hola, $userName!"),
-          Text(" estás en: $place"),
+          Text(" estás en: $currentPlace"),
         ],
       ),
     );
   }
 
-  dialogLocations() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        // ignore: prefer_const_constructors
-        child: AlertDialog(
-          title: const Text("Ubicaciones favoritas"),
-          shape: LinearBorder(),
-          content: SingleChildScrollView(child: gimmeLocations()),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Añadir'),
-              onPressed: () {
-                addOrEditLocation("", "");
-              },
+  Widget categoriesRow() {
+    return SizedBox(
+      height: 100,
+      child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          itemCount: categoriesListTipos.length,
+          separatorBuilder: (_, __) => const SizedBox(
+                width: 16,
+              ),
+          itemBuilder: (context, index) {
+            return categoriesWidget(
+              nombre: categoriesListTipos[index],
+              image: categoriesListImages[index],
+            );
+          }),
+    );
+  }
+
+  Widget categoriesWidget({required String nombre, required String image}) {
+    return GestureDetector(
+        onTap: () {
+          updateQuery(categoriaLocal: nombre, placeLocal: selectedPlace);
+        },
+        child: Column(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOutCirc,
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              alignment: Alignment.center,
+              height: 60.0,
+              width: 60.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.amberAccent,
+              ),
+              child: Image.asset(image),
             ),
-            TextButton(
-              child: const Text('Salir'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+            SizedBox(height: 4.0),
+            Container(
+              width: 60,
+              child: Text(
+                nombre,
+                style: const TextStyle(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
           ],
-        ),
+        ));
+  }
+
+  Widget _getMyWardrobe() {
+    return Expanded(
+      child: Column(
+        children: [
+          Text.rich(
+            TextSpan(text: "$cantidad $categoria en ", children: [
+              TextSpan(
+                text: "$selectedPlace ",
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => myModal(context, gimmeLocations()),
+              ),
+              const WidgetSpan(child: Icon(Icons.arrow_drop_down_outlined))
+            ]),
+          ),
+          const SizedBox(height: 15),
+          Expanded(
+              child: FirebaseAnimatedList(
+            key: key,
+            controller: _scrollController,
+            query: query,
+            itemBuilder: (context, snapshot, animation, index) {
+              final json = snapshot.value as Map<dynamic, dynamic>;
+              final prenda = Clothes.fromJson(json);
+              final nodeKey = snapshot.key;
+              return ClothesWidget(clothes: prenda, nodeKey: nodeKey);
+            },
+          )),
+        ],
       ),
     );
   }
 
   Widget gimmeLocations() {
-    return SizedBox(
-      width: 150,
-      height: 150,
-      child: FirebaseAnimatedList(
-        query:
-            FirebaseDatabase.instance.ref().child('clothes/$user/Ubicaciones'),
-        itemBuilder: (context, snapshot, animation, index) {
-          final json = snapshot.value as Map<dynamic, dynamic>;
-          final ubicacion = json['ubicacion'] as String;
-          final key = snapshot.key;
-          return SubmenuButton(menuChildren: [
-            TextButton(
-                onPressed: () {
-                  updateQuery(
-                      categoriaLocal:
-                          context.read<CategoryProvider>().currentCategory,
-                      placeLocal: ubicacion);
-                  Navigator.of(context).pop();
-                },
-                child: Text("Seleccionar")),
-            TextButton(
-                onPressed: () => addOrEditLocation(ubicacion, key!),
-                child: Text("Editar")),
-            TextButton(onPressed: () {}, child: Text("Borrar")),
-          ], child: Text(ubicacion));
-        },
-      ),
+    Offset _tapPosition = Offset.zero;
+    void _getTapPosition(TapDownDetails tapPosition) {
+      final RenderBox referenceBox = context.findRenderObject() as RenderBox;
+      setState(() => _tapPosition =
+          referenceBox.globalToLocal(tapPosition.globalPosition));
+    }
+
+    void _showContextMenu(
+        BuildContext context, String location, String key) async {
+      final RenderObject? overlay =
+          Overlay.of(context).context.findRenderObject();
+
+      final result = await showMenu(
+          context: context,
+          position: RelativeRect.fromRect(
+              Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 100, 100),
+              Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width,
+                  overlay.paintBounds.size.height)),
+          items: [
+            const PopupMenuItem(
+              value: "editar",
+              child: Text('Editar'),
+            ),
+            const PopupMenuItem(
+              value: "borrar",
+              child: Text('Borrar'),
+            )
+          ]);
+      // perform action on selected menu item
+      switch (result) {
+        case 'editar':
+          addOrEditLocation(location, key);
+          break;
+        case 'borrar':
+          print('borrar');
+          Navigator.pop(context);
+          break;
+      }
+    }
+
+    return Column(
+      children: [
+        FirebaseAnimatedList(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          query: FirebaseDatabase.instance
+              .ref()
+              .child('clothes/$user/Ubicaciones'),
+          itemBuilder: (context, snapshot, animation, index) {
+            final json = snapshot.value as Map<dynamic, dynamic>;
+            final ubicacion = json['ubicacion'] as String;
+            final key = snapshot.key;
+            return GestureDetector(
+              onTapDown: (position) => {_getTapPosition(position)},
+              onTap: () {
+                updateQuery(
+                    categoriaLocal:
+                        context.read<CategoryProvider>().currentCategory,
+                    placeLocal: ubicacion);
+                Navigator.of(context).pop();
+              },
+              onLongPress: () => {_showContextMenu(context, ubicacion, key!)},
+              child: Center(
+                  child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  ubicacion,
+                  style: TextStyle(fontSize: 18, color: Colors.amber[700]),
+                ),
+              )),
+            );
+          },
+        ),
+        Divider(),
+        TextButton(
+            onPressed: () => addOrEditLocation("", ""),
+            child: const Text(
+              "Añadir",
+              textScaleFactor: 1.1,
+            ))
+      ],
     );
   }
 
@@ -195,7 +313,7 @@ class MyWardrobeState extends State<MyWardrobe> {
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               // ignore: prefer_const_constructors
               child: AlertDialog(
-                title: const Text("Ubicaciones favoritas"),
+                title: const Text("Añadir ubicación favorita"),
                 shape: LinearBorder(),
                 content: SingleChildScrollView(
                   child: ListBody(
@@ -244,111 +362,23 @@ class MyWardrobeState extends State<MyWardrobe> {
     setState(() {
       categoria =
           context.read<CategoryProvider>().currentCategory = categoriaLocal;
-      place = context.read<LocationProvider>().currentLocation = placeLocal;
+      selectedPlace = placeLocal;
       dbReference =
           FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
-      query = dbReference.orderByChild('place').equalTo(place);
-      countChildren(dbReference);
+      query = dbReference.orderByChild('place').equalTo(selectedPlace);
+      if (FirebaseAuth.instance.currentUser != null) {
+        countChildren(dbReference);
+      }
       key = Key(DateTime.now().millisecondsSinceEpoch.toString());
     });
   }
 
-  Widget categoriesRow() {
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
-          itemCount: categoriesListTipos.length,
-          separatorBuilder: (_, __) => const SizedBox(
-                width: 16,
-              ),
-          itemBuilder: (context, index) {
-            return categoriesWidget(
-              nombre: categoriesListTipos[index],
-              image: categoriesListImages[index],
-            );
-          }),
-    );
-  }
-
-  Widget categoriesWidget({required String nombre, required String image}) {
-    return GestureDetector(
-        onTap: () {
-          updateQuery(
-              categoriaLocal: nombre,
-              placeLocal: context.read<LocationProvider>().currentLocation);
-        },
-        child: Column(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOutCirc,
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              alignment: Alignment.center,
-              height: 60.0,
-              width: 60.0,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.amberAccent,
-              ),
-              child: Image.asset(image),
-            ),
-            SizedBox(height: 4.0),
-            Container(
-              width: 60,
-              child: Text(
-                nombre,
-                style: const TextStyle(
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            )
-          ],
-        ));
-  }
-
-  Widget _getMyWardrobe() {
-    return Expanded(
-      child: Column(
-        children: [
-          Text.rich(
-            TextSpan(text: "$cantidad $categoria en ", children: [
-              TextSpan(
-                text: context.read<LocationProvider>().currentLocation,
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    dialogLocations();
-                  },
-              )
-            ]),
-          ),
-          const SizedBox(height: 15),
-          Expanded(
-              child: FirebaseAnimatedList(
-            key: key,
-            controller: _scrollController,
-            query: query,
-            itemBuilder: (context, snapshot, animation, index) {
-              final json = snapshot.value as Map<dynamic, dynamic>;
-              final prenda = Clothes.fromJson(json);
-              final nodeKey = snapshot.key;
-              return ClothesWidget(clothes: prenda, nodeKey: nodeKey);
-            },
-          )),
-        ],
-      ),
-    );
-  }
-
   /// Cuenta el numero de hijos de un nodo, para contar la cantidad de ropa
   countChildren(DatabaseReference fromPath) async {
-    final event = await fromPath.once(DatabaseEventType.value);
+    final event = await fromPath
+        .orderByChild('place')
+        .equalTo(selectedPlace)
+        .once(DatabaseEventType.value);
     int length = event.snapshot.children.length;
     setState(() => cantidad = length);
   }

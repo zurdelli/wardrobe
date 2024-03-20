@@ -40,7 +40,7 @@ class LoginPageState extends State<LoginPage> {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                "Login Page",
+                "wardrobe",
                 style: TextStyle(color: Colors.black, fontSize: 24),
               ),
             ),
@@ -59,7 +59,9 @@ class LoginPageState extends State<LoginPage> {
         key: _formKey,
         child: Column(children: [
           emailFormField(),
+          const SizedBox(height: 10),
           passwFormField(),
+          const SizedBox(height: 10),
           buttonLogin(),
           buttonCreateUser(),
           orLine(),
@@ -89,7 +91,7 @@ class LoginPageState extends State<LoginPage> {
       );
 
   Widget buttonLogin() => FractionallySizedBox(
-        widthFactor: 0.6,
+        widthFactor: 1,
         child: ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
@@ -108,7 +110,7 @@ class LoginPageState extends State<LoginPage> {
                 }
               }
             },
-            child: Text("Login")),
+            child: const Text("Login")),
       );
 
   Widget buttonCreateUser() => Row(
@@ -118,7 +120,7 @@ class LoginPageState extends State<LoginPage> {
           TextButton(
             onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (context) => CreateUser())),
-            child: Text("Registrarse"),
+            child: const Text("Registrarse"),
           )
         ],
       );
@@ -128,7 +130,7 @@ class LoginPageState extends State<LoginPage> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(child: Divider()),
-          Text("o"),
+          Text(" o "),
           Expanded(child: Divider())
         ],
       );

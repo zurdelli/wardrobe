@@ -36,9 +36,9 @@ class MyApp extends StatelessWidget {
         title: 'wardrobe',
         theme: ThemeData(primarySwatch: Colors.amber),
         initialRoute:
-            FirebaseAuth.instance.currentUser == null ? "/login" : "/",
+            FirebaseAuth.instance.currentUser == null ? "/login" : "/home",
         routes: {
-          "/": (context) => MyWardrobe(),
+          "/home": (context) => const MyWardrobe(),
           "/login": (context) => const LoginPage(),
           "/formclothes": (context) => const ClothesForm(),
         },

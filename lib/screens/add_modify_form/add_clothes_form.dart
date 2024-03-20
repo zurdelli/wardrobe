@@ -6,14 +6,13 @@ import 'package:wardrobe/data/clothes/clothes_dao.dart';
 import 'package:wardrobe/data/clothes/clothes_model.dart';
 import 'package:wardrobe/provider/category_provider.dart';
 import 'package:wardrobe/provider/clothes_provider.dart';
-import 'package:wardrobe/provider/location_provider.dart';
 import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/brand_model_row/brand_model.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/colors_row/colors.dart';
+import 'package:wardrobe/screens/add_modify_form/widgets/location_sublocation_row/location_sublocation_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/photo_row/photo_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/size_row/size_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/store_place_date_warranty/store_place_date_warranty.dart';
-import 'package:wardrobe/screens/register.dart';
 import 'package:wardrobe/utilities.dart';
 
 /// Representa el formulario para agregar/modificar alguna ropa
@@ -65,10 +64,11 @@ class _ClothesFormState extends State<ClothesForm> {
             child: Column(children: [
               categoryRow(currentCategory),
               myRow(child: const PhotoRow(), titulo: "Foto"),
+              myRow(child: const SublocationRow(), titulo: "Ubicación "),
               myRow(child: const BrandModelRow(), titulo: "Marca"),
               myRow(child: const StoreDatePlaceWarranty(), titulo: "Tienda"),
               myRow(child: const SizeRow(), titulo: "Tamaño"),
-              ColorsRow()
+              myRow(child: ColorsRow(), titulo: "Color"),
             ]),
           ),
         ));
@@ -77,7 +77,7 @@ class _ClothesFormState extends State<ClothesForm> {
   Widget myRow({required Widget child, required String titulo}) {
     return Column(
       children: [
-        SizedBox(width: 0.0, height: 5),
+        const SizedBox(width: 0.0, height: 5),
         Row(
           children: [
             const Expanded(flex: 1, child: Divider()),
@@ -86,7 +86,7 @@ class _ClothesFormState extends State<ClothesForm> {
             const Expanded(flex: 9, child: Divider()),
           ],
         ),
-        SizedBox(width: 0.0, height: 5),
+        const SizedBox(width: 0.0, height: 5),
         child
       ],
     );
@@ -97,7 +97,7 @@ class _ClothesFormState extends State<ClothesForm> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("Categoría"),
+        const Text("Categoría: "),
         DropdownButton(
           value: categoria,
           onChanged: (String? value) {
@@ -139,8 +139,6 @@ class _ClothesFormState extends State<ClothesForm> {
                     sublocation: context.read<ClothesProvider>().sublocation,
                     warranty: context.read<ClothesProvider>().warranty),
                 _clothesRef,
-                currentUser,
-                currentCategory,
                 nodeKey);
             Navigator.pop(context);
           } else {

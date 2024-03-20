@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,10 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:wardrobe/provider/category_provider.dart';
 
 import 'package:wardrobe/provider/clothes_provider.dart';
+import 'package:wardrobe/provider/user_provider.dart';
 
 import 'widgets/select_photo_options_screen.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
 
 class PhotoRow extends StatefulWidget {
   const PhotoRow({super.key});
@@ -20,11 +23,12 @@ class PhotoRow extends StatefulWidget {
 
 class _PhotoRowState extends State<PhotoRow> {
   String imageBase64 = "";
+  String myBucket = FirebaseStorage.instance.bucket;
 
   @override
   void initState() {
     super.initState();
-    imageBase64 = Provider.of<ClothesProvider>(context, listen: false).image;
+    imageBase64 = context.read<ClothesProvider>().image;
   }
 
   @override
@@ -42,16 +46,21 @@ class _PhotoRowState extends State<PhotoRow> {
               color: Colors.grey.shade200,
             ),
             child: Center(
-              child: imageBase64.isEmpty
-                  ? const Text(
-                      'No image selected',
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                    )
-                  : CircleAvatar(
-                      backgroundImage: MemoryImage(base64Decode(imageBase64)),
-                      radius: 200.0,
-                    ),
-            ),
+                child: imageBase64.isEmpty
+                    ? const Text(
+                        'No image selected',
+                        style: TextStyle(fontSize: 20, color: Colors.black),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey.shade200,
+                        ),
+                        child: FadeInImage.assetNetwork(
+                            //fit: BoxFit.cover,
+                            placeholder: "assets/images/clothes.jpg",
+                            image: context.read<ClothesProvider>().image),
+                      )),
           ),
         ),
       ),
@@ -93,7 +102,6 @@ class _PhotoRowState extends State<PhotoRow> {
       File? img = File(image.path);
       img = await _cropImage(img); // la llevo al cropper
     } on PlatformException catch (e) {
-      print("exception: $e");
       Navigator.pop(context);
     }
   }
@@ -111,21 +119,54 @@ class _PhotoRowState extends State<PhotoRow> {
           lockAspectRatio: true,
           toolbarWidgetColor:
               MediaQuery.of(context).platformBrightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white),
+                  ? Colors.white
+                  : Colors.black),
       IOSUiSettings(title: 'Crop')
     ]);
 
     if (cropped != null) {
       setState(() {
         imageFile = File(cropped.path);
-
-        imageBase64 = base64Encode(imageFile.readAsBytesSync());
-        Provider.of<ClothesProvider>(context, listen: false).image =
-            imageBase64;
-        //print("imageBase64: $imageBase64");
+        uploadToStorage(imageFile);
         Navigator.of(context).pop();
       });
     }
+  }
+
+  uploadToStorage(File file) async {
+    final storageRef = FirebaseStorage.instance.ref();
+    final metadata = SettableMetadata(contentType: "image/jpeg");
+    final uniqueUploadID = DateTime.now().millisecondsSinceEpoch.toString();
+    final path =
+        "clothes/${context.read<UserProvider>().currentUser}/${context.read<CategoryProvider>().currentCategory}/$uniqueUploadID.jpg";
+    final uploadTask = storageRef.child(path).putFile(file, metadata);
+
+    // Listen for state changes, errors, and completion of the upload.
+    uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
+      switch (taskSnapshot.state) {
+        case TaskState.running:
+          final progress =
+              100.0 * (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+          print("Upload is $progress% complete.");
+          break;
+        case TaskState.paused:
+          print("Upload is paused.");
+          break;
+        case TaskState.canceled:
+          print("Upload was canceled");
+          break;
+        case TaskState.error:
+          // Handle unsuccessful uploads
+          break;
+        case TaskState.success:
+          context.read<ClothesProvider>().image =
+              await storageRef.child(path).getDownloadURL();
+          setState(() {
+            imageBase64 = context.read<ClothesProvider>().image;
+          });
+
+          break;
+      }
+    });
   }
 }

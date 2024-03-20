@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:firebase_database/firebase_database.dart';
@@ -42,13 +41,16 @@ class ClothesWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(
-                  backgroundImage: MemoryImage(base64Decode(clothes.image)),
-                  radius: 30.0,
-                ),
-                const SizedBox(width: 30),
+                FadeInImage.assetNetwork(
+                    height: 80,
+                    fit: BoxFit.cover,
+                    placeholder: "assets/images/clothes.jpg",
+                    image: clothes.image),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Align(
                         alignment: Alignment.topLeft,
@@ -107,14 +109,8 @@ class ClothesWidget extends StatelessWidget {
               Container(
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
-                child:
-                    // FadeInImage.assetNetwork(
-                    //     placeholder: 'assets/clothes.jpg', image: clothes.image)
-
-                    Image.memory(
-                  base64Decode(clothes.image),
-                  //radius: 250,
-                ),
+                child: FadeInImage.assetNetwork(
+                    placeholder: 'assets/clothes.jpg', image: clothes.image),
               ),
               Row(
                 children: [

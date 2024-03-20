@@ -26,7 +26,7 @@ class CreateUserState extends State<CreateUser> {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                "Create User",
+                "Nuevo usuario",
                 style: TextStyle(color: Colors.black, fontSize: 24),
               ),
             ),
@@ -34,7 +34,7 @@ class CreateUserState extends State<CreateUser> {
                 offstage: error.isEmpty,
                 child: Text(
                   error,
-                  style: TextStyle(color: Colors.red, fontSize: 16),
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
                 )),
             Padding(padding: const EdgeInsets.all(16.0), child: formulario()),
           ],
@@ -43,8 +43,13 @@ class CreateUserState extends State<CreateUser> {
 
   Widget formulario() => Form(
         key: _formKey,
-        child: Column(
-            children: [emailFormField(), passwFormField(), buttonCreateUser()]),
+        child: Column(children: [
+          emailFormField(),
+          const SizedBox(height: 10),
+          passwFormField(),
+          const SizedBox(height: 10),
+          buttonCreateUser()
+        ]),
       );
 
   Widget emailFormField() => TextFormField(
@@ -72,7 +77,7 @@ class CreateUserState extends State<CreateUser> {
       );
 
   Widget buttonCreateUser() => FractionallySizedBox(
-        widthFactor: 0.6,
+        widthFactor: 1,
         child: ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {

@@ -37,12 +37,12 @@ class _ColorsRowState extends State<ColorsRow> {
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
                 //minimumSize: Size(160, 60),
-                shape: ContinuousRectangleBorder(),
+                shape: const ContinuousRectangleBorder(),
                 side: BorderSide(
                     color: MediaQuery.of(context).platformBrightness ==
                             Brightness.light
-                        ? Colors.black
-                        : Colors.white,
+                        ? Colors.white
+                        : Colors.black,
                     width: 0.5),
                 backgroundColor: _color,
                 foregroundColor: _color == Colors.white ||
@@ -55,7 +55,7 @@ class _ColorsRowState extends State<ColorsRow> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text("Pick a color"),
+                    title: const Text("Pick a color"),
                     content: SingleChildScrollView(
                       child: BlockPicker(
                         pickerColor: _color,
@@ -80,7 +80,7 @@ class _ColorsRowState extends State<ColorsRow> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  WidgetSpan(child: Icon(Icons.color_lens)),
+                  const WidgetSpan(child: Icon(Icons.color_lens)),
                   TextSpan(
                       text: colorToString(_color).isEmpty
                           ? 'Color'

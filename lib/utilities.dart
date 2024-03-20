@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -7,7 +6,7 @@ import 'package:location/location.dart' as location_package;
 
 /// Translates color <-> string
 String colorToString(Color color) {
-  print("el color es: $color");
+  //print("el color es: $color");
   if (color == Colors.red) {
     return "Red";
   } else if (color == Colors.purple) {
@@ -161,6 +160,25 @@ myDialog(
   );
 }
 
+myModal(BuildContext context, Widget child) {
+  showModalBottomSheet(
+      context: context,
+      enableDrag: true,
+      //isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(25.0),
+        ),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+          initialChildSize: 0.8,
+          maxChildSize: 1,
+          minChildSize: 0.28,
+          expand: false,
+          builder: ((context, scrollController) =>
+              Padding(padding: const EdgeInsets.all(16.0), child: child))));
+}
+
 mySnackBar(BuildContext context, String content) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(content),
@@ -172,7 +190,7 @@ mySnackBar(BuildContext context, String content) {
 /// Widget de apoyo para seleccionar colores
 Widget pickerLayoutBuilder(
     BuildContext context, List<Color> colors, PickerItem child) {
-  Orientation orientation = MediaQuery.of(context).orientation;
+  //Orientation orientation = MediaQuery.of(context).orientation;
 
   return SizedBox(
     width: 300,

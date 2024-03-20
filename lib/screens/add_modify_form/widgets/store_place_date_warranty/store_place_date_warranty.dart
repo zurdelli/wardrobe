@@ -59,8 +59,35 @@ class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
                 ),
               ),
             ),
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: TextField(
+                controller: placeController,
+                onTapOutside: (event) =>
+                    Provider.of<ClothesProvider>(context, listen: false).place =
+                        placeController.text.trim(),
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.near_me),
+                  suffixIcon: IconButton(
+                    color: Colors.blue,
+                    //alignment: Alignment.centerRight,
+                    icon: Icon(Icons.gps_fixed),
+                    onPressed: () async {
+                      placeController.text = await getLocation();
+                      context.read<ClothesProvider>().place =
+                          placeController.text;
+                    },
+                  ),
+                  labelText: 'Donde fue adquirida',
+                ),
+              ),
+            ),
           ],
         ),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
@@ -89,36 +116,14 @@ class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
                 },
               ),
             ),
-            const SizedBox(width: 5),
-            Expanded(
-              flex: 3,
-              child: TextField(
-                controller: placeController,
-                onTapOutside: (event) =>
-                    Provider.of<ClothesProvider>(context, listen: false).place =
-                        placeController.text.trim(),
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.near_me),
-                  suffixIcon: IconButton(
-                    color: Colors.blue,
-                    //alignment: Alignment.centerRight,
-                    icon: Icon(Icons.gps_fixed),
-                    onPressed: () async {
-                      placeController.text = await getLocation();
-                      context.read<ClothesProvider>().place =
-                          placeController.text;
-                    },
-                  ),
-                  labelText: 'Donde fue adquirida',
-                ),
-              ),
-            ),
           ],
         ),
+        const SizedBox(height: 10),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
+            Text("Garantía"),
             ToggleSwitch(
               customWidths: [90.0, 50.0],
               cornerRadius: 20.0,
@@ -184,8 +189,11 @@ class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
           offstage: context.read<ClothesProvider>().warranty.isEmpty ||
               DateTime.now().isAfter(DateTime.parse(
                   toEnglishDate(context.read<ClothesProvider>().warranty))),
-          child: Text(
-              "La garantia será hasta el ${context.read<ClothesProvider>().warranty}"),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+                "La garantia será hasta el ${context.read<ClothesProvider>().warranty}"),
+          ),
         )
       ],
     );

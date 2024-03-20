@@ -11,8 +11,8 @@ class ClothesDAO {
       FirebaseDatabase.instance.ref().child('clothes/$userid/$category');
 
   /// Add or update clothes
-  String? guardarClothes(Clothes clothes, DatabaseReference clothesRef,
-      String user, String category, String key) {
+  String? guardarClothes(
+      Clothes clothes, DatabaseReference clothesRef, String key) {
     DatabaseReference myRef =
         key == "null" ? clothesRef.push() : clothesRef.child(key);
 
