@@ -13,22 +13,23 @@ class Clothes {
   final String store;
   final String sublocation;
   final String warranty;
+  final String website;
 
-  Clothes({
-    required this.sublocation,
-    required this.brand,
-    required this.color,
-    //required this.status,
-    required this.size,
-    required this.place,
-    required this.date,
-    required this.store,
-    required this.warranty,
-    required this.image,
-    required this.hasBeenLent,
-    required this.owner,
-    required this.holder,
-  });
+  Clothes(
+      {required this.sublocation,
+      required this.brand,
+      required this.color,
+      //required this.status,
+      required this.size,
+      required this.place,
+      required this.date,
+      required this.store,
+      required this.warranty,
+      required this.image,
+      required this.hasBeenLent,
+      required this.owner,
+      required this.holder,
+      required this.website});
 
   /// Recibe un json y lo convierte a datos de las prendas
   Clothes.fromJson(Map<dynamic, dynamic> json)
@@ -44,7 +45,8 @@ class Clothes {
         image = json['image'] as String,
         hasBeenLent = json['hasBeenLent'] as bool,
         owner = json['owner'] as String,
-        holder = json['holder'] as String;
+        holder = json['holder'] as String,
+        website = json['website'] as String;
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
         'sublocation': sublocation,
@@ -60,5 +62,6 @@ class Clothes {
         'hasBeenLent': hasBeenLent,
         'owner': owner,
         'holder': holder,
+        'website': website,
       };
 }

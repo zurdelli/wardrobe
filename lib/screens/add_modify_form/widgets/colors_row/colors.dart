@@ -41,8 +41,8 @@ class _ColorsRowState extends State<ColorsRow> {
                 side: BorderSide(
                     color: MediaQuery.of(context).platformBrightness ==
                             Brightness.light
-                        ? Colors.white
-                        : Colors.black,
+                        ? Colors.black
+                        : Colors.white,
                     width: 0.5),
                 backgroundColor: _color,
                 foregroundColor: _color == Colors.white ||

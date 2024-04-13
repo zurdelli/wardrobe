@@ -18,26 +18,32 @@ class _SizeRowState extends State<SizeRow> {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       ToggleSwitch(
         minWidth: 90.0,
-        minHeight: 70.0,
+        minHeight: 50.0,
+        curve: Curves.bounceInOut,
+
         initialLabelIndex: 4,
-        cornerRadius: 20.0,
+        cornerRadius: 0.0,
         activeFgColor: Colors.white,
-        inactiveBgColor: Colors.grey,
+        inactiveBgColor: Colors.transparent,
         inactiveFgColor: Colors.white,
         totalSwitches: 7,
         labels: labels,
-        iconSize: 30.0,
-        borderWidth: 2.0,
-        borderColor: [Colors.blueGrey],
-        activeBgColors: const [
-          [Colors.cyan],
-          [Colors.blue],
-          [Colors.green],
-          [Colors.lime],
-          [Colors.orange],
-          [Colors.red],
-          [Colors.purple]
-        ],
+        iconSize: 15.0,
+        dividerColor: Colors.transparent,
+
+        //borderWidth: 1.0,
+        activeBorders: [Border.all(color: Colors.blueGrey)],
+        animate: true,
+        //borderColor: [Colors.blueGrey],
+        // activeBgColors: const [
+        //   [Colors.cyan],
+        //   [Colors.blue],
+        //   [Colors.green],
+        //   [Colors.lime],
+        //   [Colors.orange],
+        //   [Colors.red],
+        //   [Colors.purple]
+        // ],
         onToggle: (index) {
           context.read<ClothesProvider>().size = labels[index!];
         },

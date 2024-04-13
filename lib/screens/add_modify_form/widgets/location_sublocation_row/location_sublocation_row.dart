@@ -40,6 +40,7 @@ class _SublocationRowState extends State<SublocationRow> {
         Expanded(
           flex: 3,
           child: TextFormField(
+            readOnly: true,
             onTap: () => myModal(context, gimmeLocations()),
             onTapOutside: (event) => context.read<ClothesProvider>().place =
                 locController.text.trim(),

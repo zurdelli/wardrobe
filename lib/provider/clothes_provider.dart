@@ -15,8 +15,15 @@ class ClothesProvider extends ChangeNotifier {
   String _store = "";
   String _sublocation = "";
   String _warranty = "";
+  String _website = "";
 
   int _cantidad = 0;
+
+  String get website => _website;
+  set website(String value) {
+    _website = value;
+    notifyListeners();
+  }
 
   int get cantidad => _cantidad;
   set cantidad(int value) {

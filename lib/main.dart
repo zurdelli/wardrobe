@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'wardrobe',
-        theme: ThemeData(primarySwatch: Colors.amber),
+        //theme: ThemeData(primarySwatch: Colors.amber),
         initialRoute:
             FirebaseAuth.instance.currentUser == null ? "/login" : "/home",
         routes: {
@@ -42,6 +42,13 @@ class MyApp extends StatelessWidget {
           "/login": (context) => const LoginPage(),
           "/formclothes": (context) => const ClothesForm(),
         },
+        theme: ThemeData(
+          useMaterial3: true,
+          primarySwatch: Colors.amber,
+        ),
+        darkTheme: ThemeData.dark(
+          useMaterial3: true,
+        ),
       ),
     );
   }

@@ -22,30 +22,26 @@ class ClothesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(
-            color: Colors.grey[350]!,
-            blurRadius: 2.0,
-            offset: const Offset(0, 1.0))
-      ], borderRadius: BorderRadius.circular(5.0), color: Colors.white),
-      child: MaterialButton(
-        disabledTextColor: Colors.black87,
-        padding: const EdgeInsets.all(10),
-        onPressed: () {
-          //todo abrir un dialog con más información
-          openDialogMoreInfo(context);
-        },
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => openDialogMoreInfo(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FadeInImage.assetNetwork(
-                    height: 80,
-                    fit: BoxFit.cover,
-                    placeholder: "assets/images/clothes.jpg",
-                    image: clothes.image),
+                ClipRRect(
+                    borderRadius: BorderRadius.circular(5.0),
+                    child: FadeInImage.assetNetwork(
+                        height: 80,
+                        fit: BoxFit.cover,
+                        placeholder: "assets/images/clothes.jpg",
+                        image: clothes.image)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -64,7 +60,7 @@ class ClothesWidget extends StatelessWidget {
                         child: Text.rich(
                           TextSpan(
                             text: "${clothes.brand} ",
-                            style: const TextStyle(color: Colors.black),
+                            //style: const TextStyle(color: Colors.black),
                             children: [
                               WidgetSpan(
                                   alignment: PlaceholderAlignment.baseline,
@@ -90,6 +86,9 @@ class ClothesWidget extends StatelessWidget {
                 ),
               ],
             ),
+            Divider(
+              height: 20,
+            )
           ],
         ),
       ),
@@ -106,19 +105,16 @@ class ClothesWidget extends StatelessWidget {
           content: SingleChildScrollView(
               child: Column(
             children: [
-              Container(
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
-                child: FadeInImage.assetNetwork(
+              Stack(alignment: Alignment.bottomLeft, children: [
+                FadeInImage.assetNetwork(
                     placeholder: 'assets/clothes.jpg', image: clothes.image),
-              ),
-              Row(
-                children: [
-                  Text.rich(TextSpan(text: "${clothes.brand} ", children: [
-                    TextSpan(text: clothes.date),
-                  ]))
-                ],
-              ),
+                Column(
+                  children: [
+                    Text(clothes.brand, style: const TextStyle(fontSize: 20)),
+                    Text(clothes.date, style: const TextStyle(fontSize: 20)),
+                  ],
+                ),
+              ]),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -133,11 +129,11 @@ class ClothesWidget extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () => modalToBorrowClothes(context),
-                    icon: const Icon(Icons.swap_horizontal_circle_rounded),
+                    icon: const Icon(Icons.diversity_3),
                   ),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.abc),
+                    icon: const Icon(Icons.web_stories),
                   ),
                 ],
               )
@@ -162,6 +158,7 @@ class ClothesWidget extends StatelessWidget {
     context.read<ClothesProvider>().store = clothes.store;
     context.read<ClothesProvider>().sublocation = clothes.sublocation;
     context.read<ClothesProvider>().warranty = clothes.warranty;
+    context.read<ClothesProvider>().website = clothes.website;
 
     Navigator.popAndPushNamed(context, "/formclothes", arguments: nodeKey)
         .then((_) {});
@@ -219,7 +216,16 @@ class ClothesWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text("A un usuario de la app"),
+                    const Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Text(
+                          "Prestar",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
                     FirebaseAnimatedList(
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,

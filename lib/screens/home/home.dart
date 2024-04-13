@@ -102,28 +102,29 @@ class MyWardrobeState extends State<MyWardrobe> {
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            userAndLocationRow(),
-            categoriesRow(),
-            _getMyWardrobe(),
-          ],
-        ),
+      body: Column(
+        children: [
+          userAndLocationRow(),
+          categoriesRow(),
+          _getMyWardrobe(),
+        ],
       ),
     );
   }
 
   Widget userAndLocationRow() {
     return Padding(
-      padding: EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Hola, $userName!"),
-          Text(" estás en: $currentPlace"),
+          Row(
+            children: [
+              Text("¡Hola, $userName!", textScaleFactor: 1.3),
+            ],
+          ),
+          Text("Ubicación actual: $currentPlace"),
         ],
       ),
     );
@@ -131,7 +132,7 @@ class MyWardrobeState extends State<MyWardrobe> {
 
   Widget categoriesRow() {
     return SizedBox(
-      height: 100,
+      height: 120,
       child: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           shrinkWrap: true,
@@ -149,6 +150,7 @@ class MyWardrobeState extends State<MyWardrobe> {
     );
   }
 
+  ///Widget que representa cada círculo que corresponde a una categoría
   Widget categoriesWidget({required String nombre, required String image}) {
     return GestureDetector(
         onTap: () {
@@ -156,18 +158,30 @@ class MyWardrobeState extends State<MyWardrobe> {
         },
         child: Column(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOutCirc,
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              alignment: Alignment.center,
-              height: 60.0,
-              width: 60.0,
-              decoration: const BoxDecoration(
+            Container(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.amberAccent,
+                border:
+                    context.read<CategoryProvider>().currentCategory == nombre
+                        ? Border.fromBorderSide(BorderSide(color: Colors.amber))
+                        : Border.fromBorderSide(
+                            BorderSide(color: Colors.transparent)),
+                color: Colors.transparent,
               ),
-              child: Image.asset(image),
+              child: AnimatedContainer(
+                margin: EdgeInsets.all(3),
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOutCirc,
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                alignment: Alignment.center,
+                height: 60.0,
+                width: 60.0,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.amber,
+                ),
+                child: Image.asset(image),
+              ),
             ),
             SizedBox(height: 4.0),
             Container(
@@ -175,9 +189,9 @@ class MyWardrobeState extends State<MyWardrobe> {
               child: Text(
                 nombre,
                 style: const TextStyle(
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w500,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -191,15 +205,23 @@ class MyWardrobeState extends State<MyWardrobe> {
     return Expanded(
       child: Column(
         children: [
-          Text.rich(
-            TextSpan(text: "$cantidad $categoria en ", children: [
-              TextSpan(
-                text: "$selectedPlace ",
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () => myModal(context, gimmeLocations()),
-              ),
-              const WidgetSpan(child: Icon(Icons.arrow_drop_down_outlined))
-            ]),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => myModal(context, gimmeLocations()),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text.rich(
+                  TextSpan(
+                      text: "$cantidad $categoria en $selectedPlace",
+                      style: const TextStyle(fontSize: 16),
+                      children: const [
+                        WidgetSpan(child: Icon(Icons.arrow_drop_down_outlined))
+                      ]),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 15),
           Expanded(

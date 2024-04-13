@@ -11,19 +11,20 @@ import 'package:wardrobe/screens/add_modify_form/widgets/brand_model_row/brand_m
 import 'package:wardrobe/screens/add_modify_form/widgets/colors_row/colors.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/location_sublocation_row/location_sublocation_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/photo_row/photo_row.dart';
+import 'package:wardrobe/screens/add_modify_form/widgets/place_date_row/place_date_warranty_row.dart';
 import 'package:wardrobe/screens/add_modify_form/widgets/size_row/size_row.dart';
-import 'package:wardrobe/screens/add_modify_form/widgets/store_place_date_warranty/store_place_date_warranty.dart';
+import 'package:wardrobe/screens/add_modify_form/widgets/store_website_row/store_website_row.dart';
 import 'package:wardrobe/utilities.dart';
 
 /// Representa el formulario para agregar/modificar alguna ropa
 /// Cada prenda debe tener, entre otra info:
 /// Una foto
-///  Tienda/Lugar donde fue adquirida y la fecha
+///  Tienda y página web
+/// Lugar donde fue adquirida y la fecha
 /// Si está en garantía actualmente
 /// Lugar donde se encuentra actualmente
 /// Categoría (jerséis, chaquetas, pantalones, etc)
 /// Color
-/// Estado ( Nuevo/ Bueno/ Regular)
 /// Si ha sido prestada y el usuario actual que la tiene
 
 class ClothesForm extends StatefulWidget {
@@ -37,6 +38,7 @@ class _ClothesFormState extends State<ClothesForm> {
   String currentUser = "", currentCategory = "";
   late DatabaseReference _clothesRef;
   String nodeKey = "";
+  bool estaAbierto = false;
 
   @override
   void initState() {
@@ -55,7 +57,7 @@ class _ClothesFormState extends State<ClothesForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Add/Modify")),
+        appBar: AppBar(title: const Text("Agregar/modificar")),
         floatingActionButton: saveClothes(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SingleChildScrollView(
@@ -66,9 +68,38 @@ class _ClothesFormState extends State<ClothesForm> {
               myRow(child: const PhotoRow(), titulo: "Foto"),
               myRow(child: const SublocationRow(), titulo: "Ubicación "),
               myRow(child: const BrandModelRow(), titulo: "Marca"),
-              myRow(child: const StoreDatePlaceWarranty(), titulo: "Tienda"),
               myRow(child: const SizeRow(), titulo: "Tamaño"),
               myRow(child: ColorsRow(), titulo: "Color"),
+              ExpansionPanelList(
+                expansionCallback: (panelIndex, isExpanded) => setState(() {
+                  estaAbierto = !estaAbierto;
+                }),
+                children: [
+                  ExpansionPanel(
+                      canTapOnHeader: true,
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return ListTile(
+                          title: Text("¿Es nuevo?"),
+                          titleTextStyle: TextStyle(
+                              color:
+                                  MediaQuery.of(context).platformBrightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white),
+                        );
+                      },
+                      body: Column(
+                        children: [
+                          myRow(child: const StoreWebsite(), titulo: "Tienda"),
+                          myRow(
+                              child: const PlaceDateWarranty(),
+                              titulo: "Lugar y fecha"),
+                          SizedBox(height: 80)
+                        ],
+                      ),
+                      isExpanded: estaAbierto)
+                ],
+              ),
             ]),
           ),
         ));
@@ -77,16 +108,20 @@ class _ClothesFormState extends State<ClothesForm> {
   Widget myRow({required Widget child, required String titulo}) {
     return Column(
       children: [
-        const SizedBox(width: 0.0, height: 5),
+        const SizedBox(width: 0.0, height: 10),
         Row(
           children: [
-            const Expanded(flex: 1, child: Divider()),
+            const Expanded(
+                flex: 1,
+                child: Divider(
+                  thickness: 0.5,
+                )),
             Text("  $titulo  ",
                 style: const TextStyle(fontSize: 16, color: Colors.grey)),
             const Expanded(flex: 9, child: Divider()),
           ],
         ),
-        const SizedBox(width: 0.0, height: 5),
+        const SizedBox(width: 0.0, height: 10),
         child
       ],
     );
@@ -94,11 +129,16 @@ class _ClothesFormState extends State<ClothesForm> {
 
   Widget categoryRow(String categoria) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("Categoría: "),
+        const Text(
+          "Categoría: ",
+          style: TextStyle(fontSize: 16),
+        ),
         DropdownButton(
+          isDense: true,
+          underline: SizedBox(),
           value: categoria,
           onChanged: (String? value) {
             setState(() {
@@ -137,7 +177,8 @@ class _ClothesFormState extends State<ClothesForm> {
                     size: context.read<ClothesProvider>().size,
                     store: context.read<ClothesProvider>().store,
                     sublocation: context.read<ClothesProvider>().sublocation,
-                    warranty: context.read<ClothesProvider>().warranty),
+                    warranty: context.read<ClothesProvider>().warranty,
+                    website: context.read<ClothesProvider>().website),
                 _clothesRef,
                 nodeKey);
             Navigator.pop(context);
@@ -146,7 +187,7 @@ class _ClothesFormState extends State<ClothesForm> {
                 context, "Debes decirme donde está la prenda actualmente");
           }
         },
-        label: const Text("Save"),
+        label: const Text("Guardar"),
         icon: const Icon(Icons.save));
   }
 }

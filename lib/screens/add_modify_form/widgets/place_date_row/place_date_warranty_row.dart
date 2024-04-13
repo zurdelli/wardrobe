@@ -7,20 +7,17 @@ import 'package:wardrobe/provider/clothes_provider.dart';
 import 'package:wardrobe/utilities.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-class StoreDatePlaceWarranty extends StatefulWidget {
-  const StoreDatePlaceWarranty({super.key});
+class PlaceDateWarranty extends StatefulWidget {
+  const PlaceDateWarranty({super.key});
 
   @override
-  State<StatefulWidget> createState() => _StoreDatePlaceState();
+  State<StatefulWidget> createState() => PlaceDateWarrantyState();
 }
 
-class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
-  String store = "";
+class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
   String date = "";
   String place = "";
-  String warranty = "";
 
-  final storeController = TextEditingController();
   final placeController = TextEditingController();
   final dateController = TextEditingController();
 
@@ -28,13 +25,11 @@ class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      store = context.read<ClothesProvider>().store;
       date = context.read<ClothesProvider>().date.isEmpty
           ? DateFormat('dd-MM-yyyy').format(DateTime.now())
           : context.read<ClothesProvider>().date;
       place = context.read<ClothesProvider>().place;
 
-      storeController.text = store;
       placeController.text = place;
       dateController.text = date;
     });
@@ -46,20 +41,6 @@ class _StoreDatePlaceState extends State<StoreDatePlaceWarranty> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: TextField(
-                controller: storeController,
-                onTapOutside: (event) => context.read<ClothesProvider>().store =
-                    storeController.text.trim(),
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.store),
-                  labelText: 'Tienda',
-                ),
-              ),
-            ),
-            const SizedBox(width: 5),
             Expanded(
               flex: 1,
               child: TextField(

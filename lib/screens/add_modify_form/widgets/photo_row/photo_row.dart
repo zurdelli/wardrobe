@@ -48,7 +48,7 @@ class _PhotoRowState extends State<PhotoRow> {
             child: Center(
                 child: imageBase64.isEmpty
                     ? const Text(
-                        'No image selected',
+                        'Sin imagen',
                         style: TextStyle(fontSize: 20, color: Colors.black),
                       )
                     : Container(
