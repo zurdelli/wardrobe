@@ -32,26 +32,36 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('wardrobe')),
-        body: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                "wardrobe",
-                style: TextStyle(color: Colors.black, fontSize: 24),
+        appBar: AppBar(),
+        body: SingleChildScrollView(
+          child: SizedBox(
+            height: 600,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Expanded(
+                      flex: 1,
+                      child: Text("Wardrobe", style: TextStyle(fontSize: 36))),
+                  const Expanded(
+                      flex: 1,
+                      child: Text(
+                          //textAlign: TextAlign.center,
+                          "Bienvenido a Wardrobe. \nPor favor, ingresa tu usuario y contraseña",
+                          style: TextStyle(fontSize: 22))),
+                  Offstage(
+                      offstage: error.isEmpty,
+                      child: Text(
+                        error,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      )),
+                  Expanded(flex: 5, child: formulario())
+                ],
               ),
             ),
-            Offstage(
-                offstage: error.isEmpty,
-                child: Text(
-                  error,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                )),
-            Padding(padding: const EdgeInsets.all(16.0), child: formulario()),
-          ],
+          ),
         ));
   }
 
@@ -61,8 +71,9 @@ class LoginPageState extends State<LoginPage> {
           emailFormField(),
           const SizedBox(height: 10),
           passwFormField(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 50),
           buttonLogin(),
+          const SizedBox(height: 10),
           buttonCreateUser(),
           orLine(),
           botonesGoogleApple()
@@ -72,7 +83,8 @@ class LoginPageState extends State<LoginPage> {
   Widget emailFormField() => TextFormField(
         decoration: InputDecoration(
             labelText: "Email",
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+            border:
+                UnderlineInputBorder(borderRadius: BorderRadius.circular(8))),
         keyboardType: TextInputType.emailAddress,
         onSaved: (String? value) {
           email = value!;
@@ -82,7 +94,8 @@ class LoginPageState extends State<LoginPage> {
   Widget passwFormField() => TextFormField(
         decoration: InputDecoration(
             labelText: "Password",
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+            border:
+                UnderlineInputBorder(borderRadius: BorderRadius.circular(8))),
         obscureText: true,
         validator: (value) => value!.isEmpty ? "Campo obligatorio" : null,
         onSaved: (String? value) {
@@ -93,6 +106,13 @@ class LoginPageState extends State<LoginPage> {
   Widget buttonLogin() => FractionallySizedBox(
         widthFactor: 1,
         child: ElevatedButton(
+            style: const ButtonStyle(
+                minimumSize: MaterialStatePropertyAll(Size.fromHeight(60)),
+                shape: MaterialStatePropertyAll(
+                  RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                ),
+                backgroundColor: MaterialStatePropertyAll(Colors.amber)),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
@@ -105,25 +125,32 @@ class LoginPageState extends State<LoginPage> {
                   }
                 } else {
                   setState(() {
-                    error = "Debes verificar tu correo antes de acceder";
+                    error = "Usuario o contraseña incorrectos";
                   });
                 }
               }
             },
-            child: const Text("Login")),
+            child: const Text(
+              "Ingresar",
+              style: TextStyle(color: Colors.white),
+            )),
       );
 
-  Widget buttonCreateUser() => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          TextButton(
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (context) => CreateUser())),
-            child: const Text("Registrarse"),
-          )
-        ],
-      );
+  Widget buttonCreateUser() => FractionallySizedBox(
+      widthFactor: 1,
+      child: OutlinedButton(
+        style: const ButtonStyle(
+          minimumSize: MaterialStatePropertyAll(Size.fromHeight(60)),
+          shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+          ),
+          side: MaterialStatePropertyAll(BorderSide(color: Colors.amber)),
+        ),
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => CreateUser())),
+        child: const Text("Registrarse"),
+      ));
 
   Widget orLine() => const Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -137,7 +164,9 @@ class LoginPageState extends State<LoginPage> {
 
   Widget botonesGoogleApple() => Column(
         children: [
-          SignInButton(Buttons.Google, onPressed: () async {
+          SignInButton(Buttons.Google,
+              //shape: BeveledRectangleBorder(),
+              onPressed: () async {
             await entrarConGoogle();
             if (FirebaseAuth.instance.currentUser != null) {
               logueaYGuardaUsuario(FirebaseAuth.instance.currentUser);
@@ -160,7 +189,7 @@ class LoginPageState extends State<LoginPage> {
     // ignore: use_build_context_synchronously
     Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => MyWardrobe()),
+        MaterialPageRoute(builder: (context) => const MyWardrobe()),
         (route) => false);
   }
 

@@ -27,7 +27,7 @@ class CreateUserState extends State<CreateUser> {
               padding: EdgeInsets.all(16.0),
               child: Text(
                 "Nuevo usuario",
-                style: TextStyle(color: Colors.black, fontSize: 24),
+                style: TextStyle(fontSize: 24),
               ),
             ),
             Offstage(
