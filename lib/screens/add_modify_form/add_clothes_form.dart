@@ -64,12 +64,14 @@ class _ClothesFormState extends State<ClothesForm> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(children: [
-              categoryRow(currentCategory),
-              myRow(child: const PhotoRow(), titulo: "Foto"),
+              const PhotoRow(),
+              myRow(
+                  child: categoryRow(currentCategory),
+                  titulo: "Categoría y color"),
               myRow(child: const SublocationRow(), titulo: "Ubicación "),
               myRow(child: const BrandModelRow(), titulo: "Marca"),
               myRow(child: const SizeRow(), titulo: "Tamaño"),
-              myRow(child: ColorsRow(), titulo: "Color"),
+              //myRow(child: ColorsRow(), titulo: "Color"),
               ExpansionPanelList(
                 expansionCallback: (panelIndex, isExpanded) => setState(() {
                   estaAbierto = !estaAbierto;
@@ -132,10 +134,6 @@ class _ClothesFormState extends State<ClothesForm> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text(
-          "Categoría: ",
-          style: TextStyle(fontSize: 16),
-        ),
         DropdownButton(
           isDense: true,
           underline: SizedBox(),
@@ -155,7 +153,8 @@ class _ClothesFormState extends State<ClothesForm> {
               child: Text(value),
             );
           }).toList(),
-        )
+        ),
+        ColorsRow()
       ],
     );
   }
@@ -170,9 +169,13 @@ class _ClothesFormState extends State<ClothesForm> {
                     color: colorToString(context.read<ClothesProvider>().color),
                     date: context.read<ClothesProvider>().date,
                     hasBeenLent: context.read<ClothesProvider>().hasBeenLent,
-                    holder: context.read<UserProvider>().currentEmail,
+                    holder: context.read<ClothesProvider>().holder.isEmpty
+                        ? context.read<UserProvider>().currentUser
+                        : context.read<ClothesProvider>().holder,
                     image: context.read<ClothesProvider>().image,
-                    owner: context.read<UserProvider>().currentEmail,
+                    owner: context.read<ClothesProvider>().owner.isEmpty
+                        ? FirebaseAuth.instance.currentUser!.email ?? ""
+                        : context.read<ClothesProvider>().owner,
                     place: context.read<ClothesProvider>().place,
                     size: context.read<ClothesProvider>().size,
                     store: context.read<ClothesProvider>().store,

@@ -49,6 +49,8 @@ dependencies:
   google_sign_in: 
   flutter_signin_button: 
   toggle_switch: ^2.1.0
+  google_fonts: 6.1.0
+  animated_text_kit:
 
 dev_dependencies:
   flutter_test:

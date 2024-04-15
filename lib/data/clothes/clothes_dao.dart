@@ -20,14 +20,13 @@ class ClothesDAO {
     return myRef.key;
   }
 
-  /// Delete clothess
   deleteClothes(
           {required String category,
           required String userid,
           required String clothesid}) =>
       _singleClothesRef(userid, category).child(clothesid).remove();
 
-  /// Si una prenda es prestada a un amigo
+  /// Prestar a un amigo
   lentToFromSomeFriend(
       {required String toWhomeID,
       required bool borrowed,

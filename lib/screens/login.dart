@@ -12,6 +12,8 @@ import 'package:wardrobe/provider/user_provider.dart';
 import 'package:wardrobe/screens/home/home.dart';
 import 'package:wardrobe/screens/register.dart';
 import 'package:wardrobe/utilities.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 /// Representa la pantalla para hacer login del user
 class LoginPage extends StatefulWidget {
@@ -32,37 +34,38 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
-        body: SingleChildScrollView(
-          child: SizedBox(
-            height: 600,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Expanded(
-                      flex: 1,
-                      child: Text("Wardrobe", style: TextStyle(fontSize: 36))),
-                  const Expanded(
-                      flex: 1,
-                      child: Text(
-                          //textAlign: TextAlign.center,
-                          "Bienvenido a Wardrobe. \nPor favor, ingresa tu usuario y contraseña",
-                          style: TextStyle(fontSize: 22))),
-                  Offstage(
-                      offstage: error.isEmpty,
-                      child: Text(
-                        error,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
-                      )),
-                  Expanded(flex: 5, child: formulario())
-                ],
-              ),
-            ),
+        //appBar: AppBar(),
+        body: Stack(alignment: Alignment.center, children: [
+      Container(
+        alignment: Alignment.bottomLeft,
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/jean2.jpg"),
+                fit: BoxFit.cover)),
+        //height: 600,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text("WARDROBE",
+                  style: GoogleFonts.gluten(fontSize: 48, shadows: [
+                    Shadow(
+                        color: Colors.black, offset: Offset.fromDirection(1, 2))
+                  ])),
+              Offstage(
+                  offstage: error.isEmpty,
+                  child: Text(
+                    error,
+                    style: const TextStyle(color: Colors.red, fontSize: 16),
+                  )),
+              formulario()
+            ],
           ),
-        ));
+        ),
+      ),
+    ]));
   }
 
   Widget formulario() => Form(
@@ -74,17 +77,20 @@ class LoginPageState extends State<LoginPage> {
           const SizedBox(height: 50),
           buttonLogin(),
           const SizedBox(height: 10),
-          buttonCreateUser(),
-          orLine(),
-          botonesGoogleApple()
+          botonGoogle(),
+          createUser(),
         ]),
       );
 
   Widget emailFormField() => TextFormField(
+        style: TextStyle(color: Colors.black),
         decoration: InputDecoration(
-            labelText: "Email",
-            border:
-                UnderlineInputBorder(borderRadius: BorderRadius.circular(8))),
+          prefixIcon: Icon(Icons.email),
+          filled: true,
+          fillColor: Colors.white,
+          label: Text("Email"),
+          border: UnderlineInputBorder(),
+        ),
         keyboardType: TextInputType.emailAddress,
         onSaved: (String? value) {
           email = value!;
@@ -92,10 +98,14 @@ class LoginPageState extends State<LoginPage> {
       );
 
   Widget passwFormField() => TextFormField(
+        style: TextStyle(color: Colors.black),
         decoration: InputDecoration(
-            labelText: "Password",
-            border:
-                UnderlineInputBorder(borderRadius: BorderRadius.circular(8))),
+          prefixIcon: Icon(Icons.password),
+          filled: true,
+          fillColor: Colors.white,
+          label: Text("Password"),
+          border: UnderlineInputBorder(),
+        ),
         obscureText: true,
         validator: (value) => value!.isEmpty ? "Campo obligatorio" : null,
         onSaved: (String? value) {
@@ -136,7 +146,7 @@ class LoginPageState extends State<LoginPage> {
             )),
       );
 
-  Widget buttonCreateUser() => FractionallySizedBox(
+  Widget createUser() => FractionallySizedBox(
       widthFactor: 1,
       child: OutlinedButton(
         style: const ButtonStyle(
@@ -145,11 +155,16 @@ class LoginPageState extends State<LoginPage> {
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))),
           ),
-          side: MaterialStatePropertyAll(BorderSide(color: Colors.amber)),
+          side: MaterialStatePropertyAll(BorderSide(color: Colors.transparent)),
         ),
         onPressed: () => Navigator.push(
             context, MaterialPageRoute(builder: (context) => CreateUser())),
-        child: const Text("Registrarse"),
+        child: Text(
+          "¿Nuevo? Registrarse",
+          style: TextStyle(fontSize: 18, color: Colors.amber, shadows: [
+            Shadow(color: Colors.black, offset: Offset.fromDirection(1, 2))
+          ]),
+        ),
       ));
 
   Widget orLine() => const Row(
@@ -162,17 +177,19 @@ class LoginPageState extends State<LoginPage> {
         ],
       );
 
-  Widget botonesGoogleApple() => Column(
-        children: [
-          SignInButton(Buttons.Google,
-              //shape: BeveledRectangleBorder(),
-              onPressed: () async {
-            await entrarConGoogle();
-            if (FirebaseAuth.instance.currentUser != null) {
-              logueaYGuardaUsuario(FirebaseAuth.instance.currentUser);
-            }
-          }),
-        ],
+  Widget botonGoogle() => FractionallySizedBox(
+        widthFactor: 1,
+        child: SignInButton(Buttons.Google,
+            padding: EdgeInsets.all(10),
+            text: "Entrar con Google",
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            onPressed: () async {
+          await entrarConGoogle();
+          if (FirebaseAuth.instance.currentUser != null) {
+            logueaYGuardaUsuario(FirebaseAuth.instance.currentUser);
+          }
+        }),
       );
 
   logueaYGuardaUsuario(User? usuario) async {

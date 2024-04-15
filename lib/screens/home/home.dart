@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/data/clothes/clothes_model.dart';
@@ -66,21 +67,23 @@ class MyWardrobeState extends State<MyWardrobe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('wardrobe'), actions: [
-        InkWell(
-          onTap: () {
-            FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-                (route) => false);
-          },
-          child: const Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(Icons.exit_to_app),
-          ),
-        ),
-      ]),
+      appBar: AppBar(
+          title: Text('WARDROBE', style: GoogleFonts.gluten()),
+          actions: [
+            InkWell(
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                    (route) => false);
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(Icons.exit_to_app),
+              ),
+            ),
+          ]),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
@@ -114,7 +117,7 @@ class MyWardrobeState extends State<MyWardrobe> {
 
   Widget userAndLocationRow() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,13 +166,14 @@ class MyWardrobeState extends State<MyWardrobe> {
                 shape: BoxShape.circle,
                 border:
                     context.read<CategoryProvider>().currentCategory == nombre
-                        ? Border.fromBorderSide(BorderSide(color: Colors.amber))
-                        : Border.fromBorderSide(
+                        ? const Border.fromBorderSide(
+                            BorderSide(color: Colors.amber))
+                        : const Border.fromBorderSide(
                             BorderSide(color: Colors.transparent)),
                 color: Colors.transparent,
               ),
               child: AnimatedContainer(
-                margin: EdgeInsets.all(3),
+                margin: const EdgeInsets.all(3),
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeInOutCirc,
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -183,7 +187,7 @@ class MyWardrobeState extends State<MyWardrobe> {
                 child: Image.asset(image),
               ),
             ),
-            SizedBox(height: 4.0),
+            const SizedBox(height: 4.0),
             Container(
               width: 60,
               child: Text(
@@ -315,7 +319,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             );
           },
         ),
-        Divider(),
+        const Divider(),
         TextButton(
             onPressed: () => addOrEditLocation("", ""),
             child: const Text(
@@ -336,7 +340,7 @@ class MyWardrobeState extends State<MyWardrobe> {
               // ignore: prefer_const_constructors
               child: AlertDialog(
                 title: const Text("Añadir ubicación favorita"),
-                shape: LinearBorder(),
+                shape: const LinearBorder(),
                 content: SingleChildScrollView(
                   child: ListBody(
                     children: <Widget>[

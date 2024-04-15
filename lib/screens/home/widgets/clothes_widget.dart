@@ -51,7 +51,7 @@ class ClothesWidget extends StatelessWidget {
                       Align(
                         alignment: Alignment.topLeft,
                         child: Text(
-                          clothes.date,
+                          "${clothes.date} - ${clothes.store}",
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -69,11 +69,19 @@ class ClothesWidget extends StatelessWidget {
                                       maxRadius: 5,
                                       backgroundColor:
                                           stringToColor(clothes.color))),
+                              TextSpan(text: " ${clothes.size}"),
                             ],
                           ),
                         ),
                       ),
                       Align(alignment: Alignment.topLeft, child: Text("")),
+                      Offstage(
+                        offstage: clothes.holder == clothes.owner,
+                        child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                                "Prestada actualmente a ${clothes.holder}")),
+                      ),
                       Offstage(
                         offstage: clothes.warranty.isEmpty,
                         child: Align(
@@ -132,7 +140,7 @@ class ClothesWidget extends StatelessWidget {
                     icon: const Icon(Icons.diversity_3),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () => copyClothes(context),
                     icon: const Icon(Icons.web_stories),
                   ),
                 ],
@@ -142,6 +150,18 @@ class ClothesWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // copia una prenda a un mismo usuario en una misma categoria
+  copyClothes(BuildContext context) {
+    final userid = context.read<UserProvider>().currentUser;
+    final category = context.read<CategoryProvider>().currentCategory;
+    final clothesid = nodeKey ?? "";
+    DatabaseReference path =
+        FirebaseDatabase.instance.ref().child('clothes/$userid/$category');
+
+    ClothesDAO().copyRecord(path.child(clothesid), path);
+    Navigator.of(context).pop();
   }
 
   modifyClothes(BuildContext context) {
