@@ -186,7 +186,4 @@ class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
     context.read<ClothesProvider>().warranty = warrantyString;
     setState(() {});
   }
-
-  String toEnglishDate(String spanishDate) =>
-      "${spanishDate.substring(6, 10)}-${spanishDate.substring(3, 5)}-${spanishDate.substring(0, 2)}";
 }

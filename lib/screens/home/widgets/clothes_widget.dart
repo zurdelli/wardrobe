@@ -13,12 +13,23 @@ import 'package:wardrobe/utilities.dart';
 
 /// Representa al widget mostrado en la home donde se visualiza cada clothes por
 /// separado
-class ClothesWidget extends StatelessWidget {
+
+class ClothesWidget extends StatefulWidget {
   final Clothes clothes;
   final String? nodeKey;
 
   const ClothesWidget(
       {super.key, required this.clothes, required this.nodeKey});
+  @override
+  _ClothesWidgetState createState() => _ClothesWidgetState();
+}
+
+class _ClothesWidgetState extends State<ClothesWidget> {
+  @override
+  void initState() {
+    super.initState();
+    checkAndUpdateWarranty(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +48,23 @@ class ClothesWidget extends StatelessWidget {
               children: [
                 ClipRRect(
                     borderRadius: BorderRadius.circular(5.0),
-                    child: FadeInImage.assetNetwork(
-                        height: 80,
-                        fit: BoxFit.cover,
-                        placeholder: "assets/images/clothes.jpg",
-                        image: clothes.image)),
+                    child: widget.clothes.hasBeenLent
+                        ? ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                              Colors.grey,
+                              BlendMode.saturation,
+                            ),
+                            child: FadeInImage.assetNetwork(
+                              height: 80,
+                              fit: BoxFit.cover,
+                              placeholder: "assets/images/clothes.jpg",
+                              image: widget.clothes.image,
+                            ))
+                        : FadeInImage.assetNetwork(
+                            height: 80,
+                            fit: BoxFit.cover,
+                            placeholder: "assets/images/clothes.jpg",
+                            image: widget.clothes.image)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -51,7 +74,7 @@ class ClothesWidget extends StatelessWidget {
                       Align(
                         alignment: Alignment.topLeft,
                         child: Text(
-                          "${clothes.date} - ${clothes.store}",
+                          "${widget.clothes.date} - ${widget.clothes.store}",
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -59,7 +82,7 @@ class ClothesWidget extends StatelessWidget {
                         alignment: Alignment.topLeft,
                         child: Text.rich(
                           TextSpan(
-                            text: "${clothes.brand} ",
+                            text: "${widget.clothes.brand} ",
                             //style: const TextStyle(color: Colors.black),
                             children: [
                               WidgetSpan(
@@ -68,33 +91,34 @@ class ClothesWidget extends StatelessWidget {
                                   child: CircleAvatar(
                                       maxRadius: 5,
                                       backgroundColor:
-                                          stringToColor(clothes.color))),
-                              TextSpan(text: " ${clothes.size}"),
+                                          stringToColor(widget.clothes.color))),
+                              TextSpan(text: " ${widget.clothes.size}"),
                             ],
                           ),
                         ),
                       ),
-                      Align(alignment: Alignment.topLeft, child: Text("")),
+                      const Align(
+                          alignment: Alignment.topLeft, child: Text("")),
                       Offstage(
-                        offstage: clothes.holder == clothes.owner,
+                        offstage: widget.clothes.holder == widget.clothes.owner,
                         child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                                "Prestada actualmente a ${clothes.holder}")),
+                                "Prestada actualmente a ${widget.clothes.holder}")),
                       ),
                       Offstage(
-                        offstage: clothes.warranty.isEmpty,
+                        offstage: widget.clothes.warranty.isEmpty,
                         child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                                "Con garantía hasta el ${clothes.warranty}")),
+                                "Con garantía hasta el ${widget.clothes.warranty}")),
                       )
                     ],
                   ),
                 ),
               ],
             ),
-            Divider(
+            const Divider(
               height: 20,
             )
           ],
@@ -115,11 +139,14 @@ class ClothesWidget extends StatelessWidget {
             children: [
               Stack(alignment: Alignment.bottomLeft, children: [
                 FadeInImage.assetNetwork(
-                    placeholder: 'assets/clothes.jpg', image: clothes.image),
+                    placeholder: 'assets/clothes.jpg',
+                    image: widget.clothes.image),
                 Column(
                   children: [
-                    Text(clothes.brand, style: const TextStyle(fontSize: 20)),
-                    Text(clothes.date, style: const TextStyle(fontSize: 20)),
+                    Text(widget.clothes.brand,
+                        style: const TextStyle(fontSize: 20)),
+                    Text(widget.clothes.date,
+                        style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               ]),
@@ -156,7 +183,7 @@ class ClothesWidget extends StatelessWidget {
   copyClothes(BuildContext context) {
     final userid = context.read<UserProvider>().currentUser;
     final category = context.read<CategoryProvider>().currentCategory;
-    final clothesid = nodeKey ?? "";
+    final clothesid = widget.nodeKey ?? "";
     DatabaseReference path =
         FirebaseDatabase.instance.ref().child('clothes/$userid/$category');
 
@@ -165,22 +192,23 @@ class ClothesWidget extends StatelessWidget {
   }
 
   modifyClothes(BuildContext context) {
-    context.read<ClothesProvider>().brand = clothes.brand;
-    context.read<ClothesProvider>().color = stringToColor(clothes.color);
-    context.read<ClothesProvider>().date = clothes.date;
-    context.read<ClothesProvider>().hasBeenLent = clothes.hasBeenLent;
-    context.read<ClothesProvider>().holder = clothes.holder;
-    context.read<ClothesProvider>().image = clothes.image;
-    context.read<ClothesProvider>().owner = clothes.owner;
-    context.read<ClothesProvider>().place = clothes.place;
-    context.read<ClothesProvider>().size = clothes.size;
-    //context.read<ClothesProvider>().status = clothes.status;
-    context.read<ClothesProvider>().store = clothes.store;
-    context.read<ClothesProvider>().sublocation = clothes.sublocation;
-    context.read<ClothesProvider>().warranty = clothes.warranty;
-    context.read<ClothesProvider>().website = clothes.website;
+    context.read<ClothesProvider>().brand = widget.clothes.brand;
+    context.read<ClothesProvider>().color = stringToColor(widget.clothes.color);
+    context.read<ClothesProvider>().date = widget.clothes.date;
+    context.read<ClothesProvider>().hasBeenLent = widget.clothes.hasBeenLent;
+    context.read<ClothesProvider>().holder = widget.clothes.holder;
+    context.read<ClothesProvider>().image = widget.clothes.image;
+    context.read<ClothesProvider>().owner = widget.clothes.owner;
+    context.read<ClothesProvider>().place = widget.clothes.place;
+    context.read<ClothesProvider>().size = widget.clothes.size;
+    //context.read<ClothesProvider>().status =widget.clothes.status;
+    context.read<ClothesProvider>().store = widget.clothes.store;
+    context.read<ClothesProvider>().sublocation = widget.clothes.sublocation;
+    context.read<ClothesProvider>().warranty = widget.clothes.warranty;
+    context.read<ClothesProvider>().website = widget.clothes.website;
 
-    Navigator.popAndPushNamed(context, "/formclothes", arguments: nodeKey)
+    Navigator.popAndPushNamed(context, "/formclothes",
+            arguments: widget.nodeKey)
         .then((_) {});
   }
 
@@ -192,7 +220,7 @@ class ClothesWidget extends StatelessWidget {
         // ignore: prefer_const_constructors
         child: AlertDialog(
           title: const Text("¿Eliminar?"),
-          shape: LinearBorder(),
+          shape: const LinearBorder(),
           actions: <Widget>[
             TextButton(
                 child: const Text('Eliminar'),
@@ -201,7 +229,7 @@ class ClothesWidget extends StatelessWidget {
                       userid: context.read<UserProvider>().currentUser,
                       category:
                           context.read<CategoryProvider>().currentCategory,
-                      clothesid: nodeKey ?? "");
+                      clothesid: widget.nodeKey ?? "");
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 }),
@@ -245,7 +273,7 @@ class ClothesWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     FirebaseAnimatedList(
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
@@ -272,16 +300,34 @@ class ClothesWidget extends StatelessWidget {
                               );
                       },
                     ),
-                    Divider(),
+                    const Divider(),
                     TextButton(
                         onPressed: () {
                           dialogToConfirmBorrowClothes(
                               context, "", "otra persona");
                         },
+
                         //helperPrestarClothes(context, "otra persona"),
-                        child: const Text("Otra persona"))
+                        child: const Text("Otra persona")),
+                    const Divider(),
+                    TextButton(
+                      onPressed: () => clothesBack(context),
+                      child: const Text("Me la ha devuelsto"),
+                    )
                   ],
                 )))));
+  }
+
+  // Cuando vuelve la prenda desde un amigo
+  clothesBack(BuildContext context) {
+    ClothesDAO().backFromFriend(
+        borrowed: false,
+        userid: context.read<UserProvider>().currentUser,
+        clothesid: widget.nodeKey ?? "",
+        category: context.read<CategoryProvider>().currentCategory,
+        toWhomeEmail: widget.clothes.holder);
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   dialogToConfirmBorrowClothes(
@@ -293,7 +339,7 @@ class ClothesWidget extends StatelessWidget {
         // ignore: prefer_const_constructors
         child: AlertDialog(
           title: const Text("Prestar"),
-          shape: LinearBorder(),
+          shape: const LinearBorder(),
           content: Text("¿Está seguro de querer prestar esto a $userEmail"),
           actions: <Widget>[
             TextButton(
@@ -306,7 +352,7 @@ class ClothesWidget extends StatelessWidget {
                       borrowed: true,
                       category:
                           context.read<CategoryProvider>().currentCategory,
-                      clothesid: nodeKey ?? "",
+                      clothesid: widget.nodeKey ?? "",
                       toWhomeID: userID,
                       userid: context.read<UserProvider>().currentUser,
                       toWhomeEmail: userEmail);
@@ -317,5 +363,17 @@ class ClothesWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  checkAndUpdateWarranty(BuildContext context) {
+    if (DateTime.now()
+        .isAfter(DateTime.parse(toEnglishDate(widget.clothes.warranty)))) {
+      String userid = context.read<UserProvider>().currentUser;
+      String category = context.read<CategoryProvider>().currentCategory;
+      DatabaseReference myRef = FirebaseDatabase.instance
+          .ref()
+          .child('clothes/$userid/$category/${widget.nodeKey}');
+      ClothesDAO().updateWarranty(myRef, "");
+    }
   }
 }

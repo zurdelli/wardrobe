@@ -277,11 +277,16 @@ class MyWardrobeState extends State<MyWardrobe> {
       // perform action on selected menu item
       switch (result) {
         case 'editar':
-          addOrEditLocation(location, key);
+          locationCRUD(location, key);
           break;
         case 'borrar':
-          print('borrar');
-          Navigator.pop(context);
+          setState(() {
+            FirebaseDatabase.instance
+                .ref()
+                .child('clothes/$user/Ubicaciones/$key')
+                .remove();
+          });
+
           break;
       }
     }
@@ -321,7 +326,7 @@ class MyWardrobeState extends State<MyWardrobe> {
         ),
         const Divider(),
         TextButton(
-            onPressed: () => addOrEditLocation("", ""),
+            onPressed: () => locationCRUD("", ""),
             child: const Text(
               "Añadir",
               textScaleFactor: 1.1,
@@ -330,7 +335,7 @@ class MyWardrobeState extends State<MyWardrobe> {
     );
   }
 
-  addOrEditLocation(String location, String key) {
+  locationCRUD(String location, String key) {
     TextEditingController locationController = TextEditingController();
     locationController.text = location;
     showDialog(
@@ -346,7 +351,11 @@ class MyWardrobeState extends State<MyWardrobe> {
                     children: <Widget>[
                       TextField(
                         controller: locationController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                                onPressed: () async => locationController.text =
+                                    await getLocation(),
+                                icon: Icon(Icons.gps_fixed)),
                             border: OutlineInputBorder(),
                             labelText: 'Ubicación'),
                       )
@@ -359,11 +368,13 @@ class MyWardrobeState extends State<MyWardrobe> {
                     onPressed: () {
                       DatabaseReference myRef;
                       if (location.isEmpty) {
+                        // Crea una nueva ubicacion
                         myRef = FirebaseDatabase.instance
                             .ref()
                             .child('clothes/$user/Ubicaciones')
                             .push();
                       } else {
+                        // edita una ubicacion
                         myRef = FirebaseDatabase.instance
                             .ref()
                             .child('clothes/$user/Ubicaciones/$key');
@@ -392,9 +403,9 @@ class MyWardrobeState extends State<MyWardrobe> {
       dbReference =
           FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
       query = dbReference.orderByChild('place').equalTo(selectedPlace);
-      if (FirebaseAuth.instance.currentUser != null) {
-        countChildren(dbReference);
-      }
+      //if (FirebaseAuth.instance.currentUser != null) {
+      countChildren(dbReference);
+      //}
       key = Key(DateTime.now().millisecondsSinceEpoch.toString());
     });
   }

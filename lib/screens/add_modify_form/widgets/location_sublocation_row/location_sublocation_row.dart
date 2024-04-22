@@ -21,6 +21,9 @@ class _SublocationRowState extends State<SublocationRow> {
   var user;
   final locController = TextEditingController();
   final sublocController = TextEditingController();
+  late Query ubicacionesQuery;
+  late Query subUbicacionesQuery;
+  String ubicacionKey = "";
 
   @override
   void initState() {
@@ -29,6 +32,9 @@ class _SublocationRowState extends State<SublocationRow> {
     locController.text = location = context.read<ClothesProvider>().place;
     sublocController.text =
         sublocation = context.read<ClothesProvider>().sublocation;
+
+    ubicacionesQuery =
+        FirebaseDatabase.instance.ref().child('clothes/$user/Ubicaciones');
   }
 
   @override
@@ -41,7 +47,8 @@ class _SublocationRowState extends State<SublocationRow> {
           flex: 3,
           child: TextFormField(
             readOnly: true,
-            onTap: () => myModal(context, gimmeLocations()),
+            onTap: () => myModal(context,
+                gimmeLocations(query: ubicacionesQuery, isUbicacion: true)),
             onTapOutside: (event) => context.read<ClothesProvider>().place =
                 locController.text.trim(),
             controller: locController,
@@ -54,6 +61,19 @@ class _SublocationRowState extends State<SublocationRow> {
         Expanded(
           flex: 3,
           child: TextFormField(
+            readOnly: true,
+            onTap: () {
+              locController.text.isEmpty
+                  ? mySnackBar(
+                      context, "Debe seleccionar primero una ubicación")
+                  : myModal(
+                      context,
+                      gimmeLocations(
+                          query: subUbicacionesQuery, isUbicacion: false));
+            },
+            onTapOutside: (event) => context
+                .read<ClothesProvider>()
+                .sublocation = sublocController.text.trim(),
             controller: sublocController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
@@ -64,7 +84,7 @@ class _SublocationRowState extends State<SublocationRow> {
     );
   }
 
-  Widget gimmeLocations() {
+  Widget gimmeLocations({required Query query, required bool isUbicacion}) {
     Offset _tapPosition = Offset.zero;
     void _getTapPosition(TapDownDetails tapPosition) {
       final RenderBox referenceBox = context.findRenderObject() as RenderBox;
@@ -93,10 +113,10 @@ class _SublocationRowState extends State<SublocationRow> {
               child: Text('Borrar'),
             )
           ]);
-      // perform action on selected menu item
       switch (result) {
-        case 'editar':
-          addOrEditLocation(location, key);
+        case 'editar': // SI QUIERE EDITAR LA UBICACION
+          addOrEditLocation(
+              location, key, isUbicacion, isUbicacion ? "" : ubicacionKey);
           break;
         case 'borrar':
           print('borrar');
@@ -110,9 +130,7 @@ class _SublocationRowState extends State<SublocationRow> {
         FirebaseAnimatedList(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          query: FirebaseDatabase.instance
-              .ref()
-              .child('clothes/$user/Ubicaciones'),
+          query: query,
           itemBuilder: (context, snapshot, animation, index) {
             final json = snapshot.value as Map<dynamic, dynamic>;
             final ubicacion = json['ubicacion'] as String;
@@ -120,8 +138,16 @@ class _SublocationRowState extends State<SublocationRow> {
             return GestureDetector(
               onTapDown: (position) => {_getTapPosition(position)},
               onTap: () {
-                locController.text = ubicacion;
-                Navigator.of(context).pop();
+                if (isUbicacion) {
+                  locController.text = ubicacion;
+                  Navigator.of(context).pop();
+                  subUbicacionesQuery = FirebaseDatabase.instance
+                      .ref()
+                      .child('clothes/$user/Ubicaciones/$key/Sububicaciones');
+                  ubicacionKey = key!;
+                } else {
+                  sublocController.text = ubicacion;
+                }
               },
               onLongPress: () => {_showContextMenu(context, ubicacion, key!)},
               child: Center(
@@ -137,7 +163,8 @@ class _SublocationRowState extends State<SublocationRow> {
         ),
         Divider(),
         TextButton(
-            onPressed: () => addOrEditLocation("", ""),
+            onPressed: () => addOrEditLocation(
+                "", "", isUbicacion, isUbicacion ? "" : ubicacionKey),
             child: const Text(
               "Añadir",
               textScaleFactor: 1.1,
@@ -146,7 +173,8 @@ class _SublocationRowState extends State<SublocationRow> {
     );
   }
 
-  addOrEditLocation(String location, String key) {
+  addOrEditLocation(
+      String location, String key, bool isUbicacion, String ubicacionKey) {
     TextEditingController locationController = TextEditingController();
     locationController.text = location;
     showDialog(
@@ -175,14 +203,23 @@ class _SublocationRowState extends State<SublocationRow> {
                     onPressed: () {
                       DatabaseReference myRef;
                       if (location.isEmpty) {
-                        myRef = FirebaseDatabase.instance
-                            .ref()
-                            .child('clothes/$user/Ubicaciones')
-                            .push();
+                        myRef = isUbicacion
+                            ? FirebaseDatabase.instance
+                                .ref()
+                                .child('clothes/$user/Ubicaciones')
+                                .push()
+                            : FirebaseDatabase.instance
+                                .ref()
+                                .child(
+                                    'clothes/$user/Ubicaciones/$ubicacionKey/Sububicaciones')
+                                .push();
                       } else {
-                        myRef = FirebaseDatabase.instance
-                            .ref()
-                            .child('clothes/$user/Ubicaciones/$key');
+                        myRef = isUbicacion
+                            ? FirebaseDatabase.instance
+                                .ref()
+                                .child('clothes/$user/Ubicaciones/$key')
+                            : FirebaseDatabase.instance.ref().child(
+                                'clothes/$user/Ubicaciones/$ubicacionKey/Sububicaciones/$key');
                       }
                       myRef.set(<String, String>{
                         'ubicacion': locationController.text

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +30,8 @@ class LoginPageState extends State<LoginPage> {
   String error = "";
   final _formKey = GlobalKey<FormState>();
 
-  // final TextEditingController _userController = TextEditingController();
+  final TextEditingController emailResetPasswordController =
+      TextEditingController();
   // final TextEditingController _passwController = TextEditingController();
 
   @override
@@ -54,12 +57,6 @@ class LoginPageState extends State<LoginPage> {
                     Shadow(
                         color: Colors.black, offset: Offset.fromDirection(1, 2))
                   ])),
-              Offstage(
-                  offstage: error.isEmpty,
-                  child: Text(
-                    error,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
-                  )),
               formulario()
             ],
           ),
@@ -71,9 +68,29 @@ class LoginPageState extends State<LoginPage> {
   Widget formulario() => Form(
         key: _formKey,
         child: Column(children: [
+          Offstage(
+              offstage: error.isEmpty,
+              child: Text(
+                error,
+                style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    backgroundColor: Colors.white),
+              )),
+          const SizedBox(height: 10),
           emailFormField(),
           const SizedBox(height: 10),
           passwFormField(),
+          Offstage(
+            offstage: error.isEmpty,
+            child: TextButton(
+                onPressed: () => forgotPasswordDialog(context),
+                child: const Text("¿Has olvidado tu contraseña?",
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        backgroundColor: Colors.white))),
+          ),
           const SizedBox(height: 50),
           buttonLogin(),
           const SizedBox(height: 10),
@@ -83,8 +100,8 @@ class LoginPageState extends State<LoginPage> {
       );
 
   Widget emailFormField() => TextFormField(
-        style: TextStyle(color: Colors.black),
-        decoration: InputDecoration(
+        style: const TextStyle(color: Colors.black),
+        decoration: const InputDecoration(
           prefixIcon: Icon(Icons.email),
           filled: true,
           fillColor: Colors.white,
@@ -98,8 +115,8 @@ class LoginPageState extends State<LoginPage> {
       );
 
   Widget passwFormField() => TextFormField(
-        style: TextStyle(color: Colors.black),
-        decoration: InputDecoration(
+        style: const TextStyle(color: Colors.black),
+        decoration: const InputDecoration(
           prefixIcon: Icon(Icons.password),
           filled: true,
           fillColor: Colors.white,
@@ -180,9 +197,9 @@ class LoginPageState extends State<LoginPage> {
   Widget botonGoogle() => FractionallySizedBox(
         widthFactor: 1,
         child: SignInButton(Buttons.Google,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             text: "Entrar con Google",
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))),
             onPressed: () async {
           await entrarConGoogle();
@@ -244,8 +261,109 @@ class LoginPageState extends State<LoginPage> {
   userFromFirestoreToUserFromUsersModel(User? firestoreUser) {
     return usermodel.User(
         name: firestoreUser!.displayName ?? "",
-        email: firestoreUser!.email ?? "",
+        email: firestoreUser.email ?? "",
         id: firestoreUser.uid,
         image: "");
+  }
+
+  forgotPasswordDialog(BuildContext context) {
+    String alertError = "";
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => StatefulBuilder(builder:
+          (BuildContext context, void Function(void Function()) setState) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: AlertDialog(
+            contentPadding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+            content: SingleChildScrollView(
+                child: SizedBox(
+              height: 200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    "Restaurar contraseña",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Text("Introduce tu correo electrónico:"),
+                  Offstage(
+                    offstage: alertError.isEmpty,
+                    child: Text(
+                      alertError,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  TextFormField(
+                    controller: emailResetPasswordController,
+                    style: const TextStyle(color: Colors.black),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.email),
+                      filled: true,
+                      fillColor: Colors.white,
+                      label: Text("Email"),
+                      border: UnderlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: 1,
+                    child: ElevatedButton(
+                        style: const ButtonStyle(
+                            minimumSize:
+                                MaterialStatePropertyAll(Size.fromHeight(60)),
+                            shape: MaterialStatePropertyAll(
+                              RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5))),
+                            ),
+                            backgroundColor:
+                                MaterialStatePropertyAll(Colors.amber)),
+                        onPressed: () async {
+                          if (emailResetPasswordController.text.contains('@')) {
+                            try {
+                              FirebaseAuth.instance.sendPasswordResetEmail(
+                                  email: emailResetPasswordController.text);
+
+                              Navigator.of(context).pop();
+                              mySnackBar(context,
+                                  "Se ha enviado un correo de recuperación");
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'auth/invalid-email') {
+                                setState(() {
+                                  alertError = "email invalido";
+                                });
+                              }
+                              if (e.code == 'auth/user-not-found') {
+                                setState(() {
+                                  alertError = "usuario no encontrado";
+                                });
+                              }
+                            }
+                          } else {
+                            setState(() {
+                              alertError = "Debes introducir un correo válido";
+                            });
+                          }
+                        },
+                        child: const Text(
+                          "Enviar correo",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  )
+                ],
+              ),
+            )),
+          ),
+        );
+      }),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailResetPasswordController.dispose();
+    super.dispose();
   }
 }

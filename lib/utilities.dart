@@ -111,6 +111,7 @@ const List<String> categoriesListTipos = <String>[
   'Pantalones',
   'Chaquetas',
   'Abrigos',
+  'Vestidos',
   'Ropa deportiva',
   'Ropa interior',
   'Ropa de baño',
@@ -125,11 +126,12 @@ const List<String> categoriesListImages = <String>[
   'assets/images/pantalones.png',
   'assets/images/chaquetas.png',
   'assets/images/abrigos.png',
+  'assets/images/vestidos.png',
   'assets/images/ropadeportiva.png',
   'assets/images/ropainterior.png',
-  'assets/images/ropainterior.png',
+  'assets/images/ropadebano.png',
   'assets/images/pantalonescortos.png',
-  'assets/images/trajes.png',
+  'assets/images/zapatillas.png',
 ];
 
 /// Constituye un propio mensaje de dialog asi no se tiene que estar escribiendo constantemente
@@ -277,3 +279,6 @@ Future<String> getLocation() async {
 
   return place;
 }
+
+String toEnglishDate(String spanishDate) =>
+    "${spanishDate.substring(6, 10)}-${spanishDate.substring(3, 5)}-${spanishDate.substring(0, 2)}";

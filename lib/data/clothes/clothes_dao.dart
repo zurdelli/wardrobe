@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'clothes_model.dart';
 
@@ -18,6 +19,10 @@ class ClothesDAO {
 
     myRef.set(clothes.toJson());
     return myRef.key;
+  }
+
+  String? updateWarranty(DatabaseReference clothesRef, String warranty) {
+    clothesRef.update({"warranty": warranty});
   }
 
   deleteClothes(
@@ -49,6 +54,41 @@ class ClothesDAO {
       DatabaseReference toPath =
           FirebaseDatabase.instance.ref().child('clothes/$toWhomeID/$category');
       copyRecord(fromPath, toPath);
+    }
+  }
+
+  //Recupera/devuelve la prenda
+  backFromFriend(
+      {required bool borrowed,
+      required String userid,
+      required String clothesid,
+      required String category,
+      required String toWhomeEmail}) async {
+    FirebaseDatabase.instance
+        .ref()
+        .child('clothes/$userid/$category/$clothesid')
+        .update({
+      "hasBeenLent": borrowed,
+      "holder": FirebaseAuth.instance.currentUser!.email
+    });
+
+    // Para eliminarla de la coleccion del amigo
+    DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('users');
+    final event = await dbRef
+        .orderByChild("email")
+        .equalTo(toWhomeEmail)
+        .once(DatabaseEventType.value);
+
+    if (event.snapshot.exists) {
+      final userID = event.snapshot.children.first.child('id').value;
+
+      //Busco la prenda en el destino
+      DatabaseReference dbRef =
+          FirebaseDatabase.instance.ref().child('clothes/$userID/$category');
+
+      //Debería tener el mismo id? O como localizarla correctamente (?)
+    } else {
+      print(toWhomeEmail);
     }
   }
 
