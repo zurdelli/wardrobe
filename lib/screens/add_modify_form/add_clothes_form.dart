@@ -173,10 +173,12 @@ class _ClothesFormState extends State<ClothesForm> {
                         ? context.read<UserProvider>().currentUser
                         : context.read<ClothesProvider>().holder,
                     image: context.read<ClothesProvider>().image,
+                    model: context.read<ClothesProvider>().model,
                     owner: context.read<ClothesProvider>().owner.isEmpty
                         ? FirebaseAuth.instance.currentUser!.email ?? ""
                         : context.read<ClothesProvider>().owner,
                     place: context.read<ClothesProvider>().place,
+                    storePlace: context.read<ClothesProvider>().storePlace,
                     size: context.read<ClothesProvider>().size,
                     store: context.read<ClothesProvider>().store,
                     sublocation: context.read<ClothesProvider>().sublocation,

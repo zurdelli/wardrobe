@@ -119,6 +119,51 @@ const List<String> categoriesListTipos = <String>[
   'Zapatillas'
 ];
 
+const List<String> sizesListClothes = <String>[
+  '',
+  'XXS',
+  'XS',
+  'S',
+  'M',
+  'L',
+  'XL',
+  'XXL',
+];
+
+const List<String> sizesListShoes = <String>[
+  '',
+  '36',
+  '36.5',
+  '37',
+  '37.5',
+  '38',
+  '38.5',
+  '39',
+  '39.5',
+  '40',
+  '40.5',
+  '41',
+  '41.5',
+  '42',
+  '42.5',
+  '43',
+  '43.5',
+  '44',
+  '44.5',
+  '45',
+  '45.5',
+  '46',
+  '46.5',
+  '47',
+  '47.5',
+  '48',
+  '48.5',
+  '49',
+  '49.5',
+  '50',
+  '50.5'
+];
+
 const List<String> categoriesListImages = <String>[
   'assets/images/camisetas.png',
   'assets/images/sudaderas.png',
@@ -172,13 +217,16 @@ myModal(BuildContext context, Widget child) {
           top: Radius.circular(25.0),
         ),
       ),
-      builder: (context) => DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          maxChildSize: 1,
-          minChildSize: 0.28,
-          expand: false,
-          builder: ((context, scrollController) =>
-              Padding(padding: const EdgeInsets.all(16.0), child: child))));
+      builder: (ctx) => StatefulBuilder(builder:
+              (BuildContext context, void Function(void Function()) setState) {
+            return DraggableScrollableSheet(
+                initialChildSize: 0.8,
+                maxChildSize: 1,
+                minChildSize: 0.28,
+                expand: false,
+                builder: ((context, scrollController) => Padding(
+                    padding: const EdgeInsets.all(16.0), child: child)));
+          }));
 }
 
 mySnackBar(BuildContext context, String content) {

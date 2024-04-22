@@ -44,7 +44,7 @@ class _SizeRowState extends State<SizeRow> {
               minWidth: 90.0,
               minHeight: 50.0,
               curve: Curves.bounceInOut,
-              initialLabelIndex: 4,
+              initialLabelIndex: null,
               cornerRadius: 0.0,
               activeFgColor: Colors.white,
               inactiveBgColor: Colors.transparent,

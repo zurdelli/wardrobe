@@ -16,9 +16,9 @@ class PlaceDateWarranty extends StatefulWidget {
 
 class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
   String date = "";
-  String place = "";
+  String storePlace = "";
 
-  final placeController = TextEditingController();
+  final storePlaceController = TextEditingController();
   final dateController = TextEditingController();
 
   @override
@@ -28,9 +28,9 @@ class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
       date = context.read<ClothesProvider>().date.isEmpty
           ? DateFormat('dd-MM-yyyy').format(DateTime.now())
           : context.read<ClothesProvider>().date;
-      place = context.read<ClothesProvider>().place;
+      storePlace = context.read<ClothesProvider>().storePlace;
 
-      placeController.text = place;
+      storePlaceController.text = storePlace;
       dateController.text = date;
     });
   }
@@ -44,10 +44,10 @@ class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
             Expanded(
               flex: 1,
               child: TextField(
-                controller: placeController,
+                controller: storePlaceController,
                 onTapOutside: (event) =>
-                    Provider.of<ClothesProvider>(context, listen: false).place =
-                        placeController.text.trim(),
+                    Provider.of<ClothesProvider>(context, listen: false)
+                        .storePlace = storePlaceController.text.trim(),
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -57,9 +57,9 @@ class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
                     //alignment: Alignment.centerRight,
                     icon: Icon(Icons.gps_fixed),
                     onPressed: () async {
-                      placeController.text = await getLocation();
-                      context.read<ClothesProvider>().place =
-                          placeController.text;
+                      storePlaceController.text = await getLocation();
+                      context.read<ClothesProvider>().storePlace =
+                          storePlaceController.text;
                     },
                   ),
                   labelText: 'Donde fue adquirida',
@@ -185,5 +185,12 @@ class PlaceDateWarrantyState extends State<PlaceDateWarranty> {
     var warrantyString = DateFormat('dd-MM-yyyy').format(warrantyDate);
     context.read<ClothesProvider>().warranty = warrantyString;
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    dateController.dispose();
   }
 }

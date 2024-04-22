@@ -16,9 +16,8 @@ class _ColorsRowState extends State<ColorsRow> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _color = context.read<ClothesProvider>().color;
-    });
+
+    _color = context.read<ClothesProvider>().color;
   }
 
   void setcolor(Color newColor) => setState(() {

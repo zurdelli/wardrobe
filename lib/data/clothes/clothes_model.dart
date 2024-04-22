@@ -9,8 +9,9 @@ class Clothes {
   final String owner;
   final String place;
   final String size;
-  //final String status;
+  final String model;
   final String store;
+  final String storePlace;
   final String sublocation;
   final String warranty;
   final String website;
@@ -19,11 +20,12 @@ class Clothes {
       {required this.sublocation,
       required this.brand,
       required this.color,
-      //required this.status,
       required this.size,
       required this.place,
       required this.date,
+      required this.model,
       required this.store,
+      required this.storePlace,
       required this.warranty,
       required this.image,
       required this.hasBeenLent,
@@ -36,9 +38,10 @@ class Clothes {
       : sublocation = json['sublocation'] as String,
         brand = json['brand'] as String,
         color = json['color'] as String,
-        //status = json['status'] as String,
+        model = json['model'] as String,
         size = json['size'] as String,
         place = json['place'] as String,
+        storePlace = json['storePlace'] as String,
         date = json['date'] as String,
         store = json['store'] as String,
         warranty = json['warranty'] as String,
@@ -52,11 +55,12 @@ class Clothes {
         'sublocation': sublocation,
         'brand': brand,
         'color': color,
-        //'status': status,
+        'model': model,
         'size': size,
         'place': place,
         'date': date,
         'store': store,
+        'storePlace': storePlace,
         'warranty': warranty,
         'image': image,
         'hasBeenLent': hasBeenLent,

@@ -8,10 +8,11 @@ class ClothesProvider extends ChangeNotifier {
   bool _hasBeenLent = false;
   String _holder = "";
   String _image = "";
+  String _model = "";
   String _owner = "";
   String _place = "";
+  String _storePlace = "";
   String _size = "";
-  //String _status = "";
   String _store = "";
   String _sublocation = "";
   String _warranty = "";
@@ -40,6 +41,12 @@ class ClothesProvider extends ChangeNotifier {
   String get owner => _owner;
   set owner(String value) {
     _owner = value;
+    notifyListeners();
+  }
+
+  String get model => _model;
+  set model(String value) {
+    _model = value;
     notifyListeners();
   }
 
@@ -82,6 +89,12 @@ class ClothesProvider extends ChangeNotifier {
   String get place => _place;
   set place(String newValue) {
     _place = newValue;
+    notifyListeners();
+  }
+
+  String get storePlace => _storePlace;
+  set storePlace(String newValue) {
+    _storePlace = newValue;
     notifyListeners();
   }
 

@@ -15,12 +15,15 @@ class _BrandModelRowState extends State<BrandModelRow> {
   String model = "";
 
   final brandController = TextEditingController();
+  final modelController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     brand = context.read<ClothesProvider>().brand;
+    model = context.read<ClothesProvider>().model;
     brandController.text = brand;
+    modelController.text = model;
   }
 
   @override
@@ -44,7 +47,9 @@ class _BrandModelRowState extends State<BrandModelRow> {
         Expanded(
           flex: 3,
           child: TextFormField(
-            //controller: brandController,
+            onTapOutside: (event) => context.read<ClothesProvider>().model =
+                modelController.text.trim(),
+            controller: modelController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
                 border: OutlineInputBorder(), labelText: 'Modelo'),
@@ -52,5 +57,13 @@ class _BrandModelRowState extends State<BrandModelRow> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    brandController.dispose();
+    modelController.dispose();
   }
 }

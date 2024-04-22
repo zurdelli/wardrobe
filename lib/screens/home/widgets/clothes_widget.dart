@@ -138,18 +138,80 @@ class _ClothesWidgetState extends State<ClothesWidget> {
               child: Column(
             children: [
               Stack(alignment: Alignment.bottomLeft, children: [
-                FadeInImage.assetNetwork(
-                    placeholder: 'assets/clothes.jpg',
-                    image: widget.clothes.image),
+                ShaderMask(
+                  shaderCallback: (rect) {
+                    return const LinearGradient(
+                      begin: Alignment.center,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black, Color.fromARGB(0, 255, 255, 255)],
+                    ).createShader(Rect.fromLTRB(
+                        0, rect.height / 2, rect.width, rect.height));
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: FadeInImage.assetNetwork(
+                      placeholder: 'assets/clothes.jpg',
+                      image: widget.clothes.image),
+                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(widget.clothes.sublocation.isNotEmpty
+                        ? "${widget.clothes.place} - ${widget.clothes.sublocation}"
+                        : widget.clothes.place),
                     Text(widget.clothes.brand,
-                        style: const TextStyle(fontSize: 20)),
-                    Text(widget.clothes.date,
                         style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               ]),
+              Container(
+                alignment: Alignment.bottomLeft,
+                height: 20,
+                child: Text.rich(
+                  TextSpan(
+                      text: "Comprado el ${widget.clothes.date}",
+                      style: const TextStyle(fontSize: 16),
+                      children: [
+                        TextSpan(
+                            text: widget.clothes.store.isNotEmpty
+                                ? " en ${widget.clothes.store}"
+                                : ""),
+                        TextSpan(
+                            text: widget.clothes.storePlace.isNotEmpty
+                                ? " en ${widget.clothes.storePlace}"
+                                : ""),
+                      ]),
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomLeft,
+                height: 20,
+                child: Text.rich(
+                  TextSpan(
+                      text: "Talla: ${widget.clothes.size}",
+                      style: const TextStyle(fontSize: 16),
+                      children: [
+                        TextSpan(
+                            text: widget.clothes.color.isNotEmpty
+                                ? " Color: ${widget.clothes.color}"
+                                : ""),
+                      ]),
+                ),
+              ),
+              Offstage(
+                offstage: widget.clothes.warranty.isEmpty,
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  height: 20,
+                  child: Text.rich(
+                    TextSpan(
+                        text: widget.clothes.warranty.isNotEmpty
+                            ? "Garantía: hasta ${widget.clothes.warranty}"
+                            : "Sin garantía",
+                        style: const TextStyle(fontSize: 16),
+                        children: []),
+                  ),
+                ),
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -366,14 +428,16 @@ class _ClothesWidgetState extends State<ClothesWidget> {
   }
 
   checkAndUpdateWarranty(BuildContext context) {
-    if (DateTime.now()
-        .isAfter(DateTime.parse(toEnglishDate(widget.clothes.warranty)))) {
-      String userid = context.read<UserProvider>().currentUser;
-      String category = context.read<CategoryProvider>().currentCategory;
-      DatabaseReference myRef = FirebaseDatabase.instance
-          .ref()
-          .child('clothes/$userid/$category/${widget.nodeKey}');
-      ClothesDAO().updateWarranty(myRef, "");
+    if (widget.clothes.warranty.isNotEmpty) {
+      if (DateTime.now()
+          .isAfter(DateTime.parse(toEnglishDate(widget.clothes.warranty)))) {
+        String userid = context.read<UserProvider>().currentUser;
+        String category = context.read<CategoryProvider>().currentCategory;
+        DatabaseReference myRef = FirebaseDatabase.instance
+            .ref()
+            .child('clothes/$userid/$category/${widget.nodeKey}');
+        ClothesDAO().updateWarranty(myRef, "");
+      }
     }
   }
 }

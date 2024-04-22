@@ -69,4 +69,12 @@ class _StoreWebsiteState extends State<StoreWebsite> {
       )
     ]);
   }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    storeController.dispose();
+    websiteController.dispose();
+  }
 }

@@ -210,21 +210,69 @@ class LoginPageState extends State<LoginPage> {
       );
 
   logueaYGuardaUsuario(User? usuario) async {
-    // Se guarda el UID que es una clave que genera Firebase auth automáticamente
-    // Se usará luego para proteger sus datos en la base de datos
-    context.read<UserProvider>().currentUser =
-        FirebaseAuth.instance.currentUser?.uid ?? "";
-    context.read<UserProvider>().currentUserName =
+    String displayName = context.read<UserProvider>().currentUserName =
         FirebaseAuth.instance.currentUser?.displayName ?? "";
-    context.read<UserProvider>().currentEmail =
-        FirebaseAuth.instance.currentUser?.email ?? "";
-    UserDAO().guardarUser(userFromFirestoreToUserFromUsersModel(usuario));
-    context.read<LocationProvider>().currentLocation = await getLocation();
-    // ignore: use_build_context_synchronously
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MyWardrobe()),
-        (route) => false);
+
+    if (displayName.isEmpty) {
+      TextEditingController nameController = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          // ignore: prefer_const_constructors
+          child: AlertDialog(
+            title: Text("Dime tu nombre"),
+            shape: LinearBorder(),
+            content: TextField(controller: nameController),
+            actions: <Widget>[
+              TextButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () => Navigator.of(context).pop()),
+              TextButton(
+                  child: const Text('Aceptar'),
+                  onPressed: () async {
+                    FirebaseAuth.instance.currentUser
+                        ?.updateDisplayName(nameController.text);
+                    // Se guarda el UID que es una clave que genera Firebase auth automáticamente
+                    // Se usará luego para proteger sus datos en la base de datos
+                    context.read<UserProvider>().currentUser =
+                        FirebaseAuth.instance.currentUser?.uid ?? "";
+                    context.read<UserProvider>().currentUserName =
+                        FirebaseAuth.instance.currentUser?.displayName ?? "";
+                    context.read<UserProvider>().currentEmail =
+                        FirebaseAuth.instance.currentUser?.email ?? "";
+                    UserDAO().guardarUser(
+                        userFromFirestoreToUserFromUsersModel(usuario));
+                    context.read<LocationProvider>().currentLocation =
+                        await getLocation();
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MyWardrobe()),
+                        (route) => false);
+                  }),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // Se guarda el UID que es una clave que genera Firebase auth automáticamente
+      // Se usará luego para proteger sus datos en la base de datos
+      context.read<UserProvider>().currentUser =
+          FirebaseAuth.instance.currentUser?.uid ?? "";
+      context.read<UserProvider>().currentUserName =
+          FirebaseAuth.instance.currentUser?.displayName ?? "";
+      context.read<UserProvider>().currentEmail =
+          FirebaseAuth.instance.currentUser?.email ?? "";
+      UserDAO().guardarUser(userFromFirestoreToUserFromUsersModel(usuario));
+      context.read<LocationProvider>().currentLocation = await getLocation();
+      // ignore: use_build_context_synchronously
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MyWardrobe()),
+          (route) => false);
+    }
   }
 
   Future<UserCredential?> login(String email, String passw) async {

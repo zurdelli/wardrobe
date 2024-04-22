@@ -232,4 +232,21 @@ class _SublocationRowState extends State<SublocationRow> {
               ),
             ));
   }
+
+  String getKeyFromLocation(String location) {
+    var myRef = FirebaseDatabase.instance
+        .ref()
+        .child('clothes/$user/Ubicaciones')
+        .orderByChild('ubicacion')
+        .equalTo(location)
+        .get();
+    return "hh";
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    locController.dispose();
+    sublocController.dispose();
+  }
 }
