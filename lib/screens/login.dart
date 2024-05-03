@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
@@ -15,7 +14,6 @@ import 'package:wardrobe/screens/home/home.dart';
 import 'package:wardrobe/screens/register.dart';
 import 'package:wardrobe/utilities.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 
 /// Representa la pantalla para hacer login del user
 class LoginPage extends StatefulWidget {
@@ -53,10 +51,14 @@ class LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text("WARDROBE",
-                  style: GoogleFonts.gluten(fontSize: 48, shadows: [
-                    Shadow(
-                        color: Colors.black, offset: Offset.fromDirection(1, 2))
-                  ])),
+                  style: GoogleFonts.gluten(
+                      fontSize: 48,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                            color: Colors.black,
+                            offset: Offset.fromDirection(1, 2))
+                      ])),
               formulario()
             ],
           ),
@@ -167,20 +169,24 @@ class LoginPageState extends State<LoginPage> {
       widthFactor: 1,
       child: OutlinedButton(
         style: const ButtonStyle(
+          backgroundColor:
+              MaterialStatePropertyAll(Color.fromARGB(0, 255, 255, 255)),
           minimumSize: MaterialStatePropertyAll(Size.fromHeight(60)),
           shape: MaterialStatePropertyAll(
             RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))),
           ),
-          side: MaterialStatePropertyAll(BorderSide(color: Colors.transparent)),
+          side: MaterialStatePropertyAll(
+              BorderSide(color: Color.fromARGB(0, 255, 255, 255))),
         ),
         onPressed: () => Navigator.push(
             context, MaterialPageRoute(builder: (context) => CreateUser())),
         child: Text(
-          "¿Nuevo? Registrarse",
-          style: TextStyle(fontSize: 18, color: Colors.amber, shadows: [
-            Shadow(color: Colors.black, offset: Offset.fromDirection(1, 2))
-          ]),
+          "¿Nuevo? Regístrate",
+          style: TextStyle(
+              fontSize: 16,
+              color: Colors.amber[700],
+              backgroundColor: Colors.white),
         ),
       ));
 

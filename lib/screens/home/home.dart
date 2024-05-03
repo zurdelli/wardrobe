@@ -199,9 +199,9 @@ class MyWardrobeState extends State<MyWardrobe> {
             Container(
               width: 60,
               child: Text(
+                textScaleFactor: 0.85,
                 nombre,
                 style: const TextStyle(
-                  fontSize: 12.0,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -227,11 +227,11 @@ class MyWardrobeState extends State<MyWardrobe> {
                     behavior: HitTestBehavior.opaque,
                     onTap: () => myModal(context, gimmeLocations()),
                     child: Text.rich(
+                      textScaleFactor: 1.1,
                       TextSpan(
                           text: selectedPlace.isNotEmpty
                               ? "$cantidad $categoria en $selectedPlace"
                               : "$cantidad $categoria en total",
-                          style: const TextStyle(fontSize: 16),
                           children: const [
                             WidgetSpan(
                                 child: Icon(Icons.arrow_drop_down_outlined))
@@ -240,13 +240,13 @@ class MyWardrobeState extends State<MyWardrobe> {
                   ),
                 ),
               ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      showFilters = !showFilters;
-                    });
-                  },
-                  icon: const Icon(Icons.filter_list))
+              // IconButton(
+              //     onPressed: () {
+              //       setState(() {
+              //         showFilters = !showFilters;
+              //       });
+              //     },
+              //     icon: const Icon(Icons.filter_list))
             ],
           ),
           //const SizedBox(height: 15),
@@ -277,7 +277,7 @@ class MyWardrobeState extends State<MyWardrobe> {
               ),
             ),
           ),
-          //const SizedBox(height: 15),
+          const SizedBox(height: 15),
           Expanded(
               child: FirebaseAnimatedList(
             key: key,
@@ -392,36 +392,39 @@ class MyWardrobeState extends State<MyWardrobe> {
               "Todas las ubicaciones",
               style: TextStyle(fontSize: 18, color: Colors.amber[700]),
             )),
-        FirebaseAnimatedList(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          query: FirebaseDatabase.instance
-              .ref()
-              .child('clothes/$user/Ubicaciones'),
-          itemBuilder: (context, snapshot, animation, index) {
-            final json = snapshot.value as Map<dynamic, dynamic>;
-            final ubicacion = json['ubicacion'] as String;
-            final key = snapshot.key;
-            return GestureDetector(
-              onTapDown: (position) => {_getTapPosition(position)},
-              onTap: () {
-                updateQuery(
-                    categoriaLocal:
-                        context.read<CategoryProvider>().currentCategory,
-                    placeLocal: ubicacion);
-                Navigator.of(context).pop();
-              },
-              onLongPress: () => {_showContextMenu(context, ubicacion, key!)},
-              child: Center(
-                  child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  ubicacion,
-                  style: TextStyle(fontSize: 18, color: Colors.amber[700]),
-                ),
-              )),
-            );
-          },
+        Container(
+          height: 220,
+          child: FirebaseAnimatedList(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            query: FirebaseDatabase.instance
+                .ref()
+                .child('clothes/$user/Ubicaciones'),
+            itemBuilder: (context, snapshot, animation, index) {
+              final json = snapshot.value as Map<dynamic, dynamic>;
+              final ubicacion = json['ubicacion'] as String;
+              final key = snapshot.key;
+              return GestureDetector(
+                onTapDown: (position) => {_getTapPosition(position)},
+                onTap: () {
+                  updateQuery(
+                      categoriaLocal:
+                          context.read<CategoryProvider>().currentCategory,
+                      placeLocal: ubicacion);
+                  Navigator.of(context).pop();
+                },
+                onLongPress: () => {_showContextMenu(context, ubicacion, key!)},
+                child: Center(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    ubicacion,
+                    style: TextStyle(fontSize: 18, color: Colors.amber[700]),
+                  ),
+                )),
+              );
+            },
+          ),
         ),
         const Divider(),
         TextButton(

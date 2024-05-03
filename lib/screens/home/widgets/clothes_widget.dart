@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
@@ -48,23 +49,30 @@ class _ClothesWidgetState extends State<ClothesWidget> {
               children: [
                 ClipRRect(
                     borderRadius: BorderRadius.circular(5.0),
-                    child: widget.clothes.hasBeenLent
-                        ? ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                              Colors.grey,
-                              BlendMode.saturation,
-                            ),
-                            child: FadeInImage.assetNetwork(
-                              height: 80,
-                              fit: BoxFit.cover,
-                              placeholder: "assets/images/clothes.jpg",
-                              image: widget.clothes.image,
-                            ))
-                        : FadeInImage.assetNetwork(
+                    child: widget.clothes.thumbnail.isNotEmpty
+                        ? widget.clothes.hasBeenLent &&
+                                widget.clothes.holder !=
+                                    FirebaseAuth.instance.currentUser!.email
+                            ? ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                  Colors.grey,
+                                  BlendMode.saturation,
+                                ),
+                                child: FadeInImage.assetNetwork(
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                  placeholder: "assets/images/clothes.jpg",
+                                  image: widget.clothes.thumbnail,
+                                ))
+                            : FadeInImage.assetNetwork(
+                                height: 80,
+                                fit: BoxFit.cover,
+                                placeholder: "assets/images/clothes.jpg",
+                                image: widget.clothes.thumbnail)
+                        : Image.asset(
+                            "assets/images/clothes.jpg",
                             height: 80,
-                            fit: BoxFit.cover,
-                            placeholder: "assets/images/clothes.jpg",
-                            image: widget.clothes.image)),
+                          )),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -74,7 +82,9 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                       Align(
                         alignment: Alignment.topLeft,
                         child: Text(
-                          "${widget.clothes.date} - ${widget.clothes.store}",
+                          widget.clothes.store.isEmpty
+                              ? widget.clothes.date
+                              : "${widget.clothes.date} - ${widget.clothes.store}",
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -82,7 +92,9 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                         alignment: Alignment.topLeft,
                         child: Text.rich(
                           TextSpan(
-                            text: "${widget.clothes.brand} ",
+                            text: widget.clothes.model.isEmpty
+                                ? "${widget.clothes.brand} "
+                                : "${widget.clothes.brand} - ${widget.clothes.model} ",
                             //style: const TextStyle(color: Colors.black),
                             children: [
                               WidgetSpan(
@@ -97,14 +109,23 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                           ),
                         ),
                       ),
-                      const Align(
-                          alignment: Alignment.topLeft, child: Text("")),
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            widget.clothes.sublocation,
+                            style: TextStyle(fontSize: 12),
+                          )),
                       Offstage(
                         offstage: widget.clothes.holder == widget.clothes.owner,
                         child: Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                                "Prestada actualmente a ${widget.clothes.holder}")),
+                              widget.clothes.holder !=
+                                      FirebaseAuth.instance.currentUser!.email
+                                  ? "Prestada actualmente a ${widget.clothes.holder}"
+                                  : "Dueño: ${widget.clothes.owner}",
+                              style: TextStyle(color: Colors.red),
+                            )),
                       ),
                       Offstage(
                         offstage: widget.clothes.warranty.isEmpty,
@@ -148,18 +169,20 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                         0, rect.height / 2, rect.width, rect.height));
                   },
                   blendMode: BlendMode.dstIn,
-                  child: FadeInImage.assetNetwork(
-                      placeholder: 'assets/clothes.jpg',
-                      image: widget.clothes.image),
+                  child: widget.clothes.image.isNotEmpty
+                      ? FadeInImage.assetNetwork(
+                          placeholder: 'assets/images/clothes.jpg',
+                          image: widget.clothes.image)
+                      : Image.asset('assets/images/clothes.jpg'),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(widget.clothes.brand,
+                        style: const TextStyle(fontSize: 20)),
                     Text(widget.clothes.sublocation.isNotEmpty
                         ? "${widget.clothes.place} - ${widget.clothes.sublocation}"
                         : widget.clothes.place),
-                    Text(widget.clothes.brand,
-                        style: const TextStyle(fontSize: 20)),
                   ],
                 ),
               ]),
@@ -169,7 +192,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                 child: Text.rich(
                   TextSpan(
                       text: "Comprado el ${widget.clothes.date}",
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 14),
                       children: [
                         TextSpan(
                             text: widget.clothes.store.isNotEmpty
@@ -188,7 +211,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                 child: Text.rich(
                   TextSpan(
                       text: "Talla: ${widget.clothes.size}",
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 14),
                       children: [
                         TextSpan(
                             text: widget.clothes.color.isNotEmpty
@@ -207,7 +230,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                         text: widget.clothes.warranty.isNotEmpty
                             ? "Garantía: hasta ${widget.clothes.warranty}"
                             : "Sin garantía",
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 14),
                         children: []),
                   ),
                 ),
@@ -374,7 +397,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                     const Divider(),
                     TextButton(
                       onPressed: () => clothesBack(context),
-                      child: const Text("Me la ha devuelsto"),
+                      child: const Text("Me la ha devuelto"),
                     )
                   ],
                 )))));

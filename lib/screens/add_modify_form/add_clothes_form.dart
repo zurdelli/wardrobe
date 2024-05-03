@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -161,8 +163,24 @@ class _ClothesFormState extends State<ClothesForm> {
 
   Widget saveClothes() {
     return FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
           if (context.read<ClothesProvider>().place.isNotEmpty) {
+            if (context.read<ClothesProvider>().image.isEmpty) {
+              if (context.read<ClothesProvider>().imageCache.isNotEmpty) {
+                await uploadToStorage(
+                        context.read<ClothesProvider>().imageCache, context)
+                    .then(
+                  (value) {
+                    final divider = value.indexOf('#');
+                    context.read<ClothesProvider>().image =
+                        value.substring(0, divider);
+                    context.read<ClothesProvider>().thumbnail =
+                        value.substring(divider + 1, value.length);
+                  },
+                );
+              }
+            }
+
             ClothesDAO().guardarClothes(
                 Clothes(
                     brand: context.read<ClothesProvider>().brand,
@@ -170,9 +188,10 @@ class _ClothesFormState extends State<ClothesForm> {
                     date: context.read<ClothesProvider>().date,
                     hasBeenLent: context.read<ClothesProvider>().hasBeenLent,
                     holder: context.read<ClothesProvider>().holder.isEmpty
-                        ? context.read<UserProvider>().currentUser
+                        ? FirebaseAuth.instance.currentUser!.email ?? ""
                         : context.read<ClothesProvider>().holder,
                     image: context.read<ClothesProvider>().image,
+                    thumbnail: context.read<ClothesProvider>().thumbnail,
                     model: context.read<ClothesProvider>().model,
                     owner: context.read<ClothesProvider>().owner.isEmpty
                         ? FirebaseAuth.instance.currentUser!.email ?? ""

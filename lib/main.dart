@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'wardrobe',
+        debugShowCheckedModeBanner: false,
         //theme: ThemeData(primarySwatch: Colors.amber),
         initialRoute:
             FirebaseAuth.instance.currentUser == null ? "/login" : "/home",

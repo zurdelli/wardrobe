@@ -50,7 +50,14 @@ dependencies:
   flutter_signin_button: 
   toggle_switch: ^2.1.0
   google_fonts: 6.1.0
-  animated_text_kit:
+  image:
+  path_provider: 
+  flutter_launcher_icons:
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
 
 dev_dependencies:
   flutter_test:

@@ -13,6 +13,7 @@ class Clothes {
   final String store;
   final String storePlace;
   final String sublocation;
+  final String thumbnail;
   final String warranty;
   final String website;
 
@@ -31,6 +32,7 @@ class Clothes {
       required this.hasBeenLent,
       required this.owner,
       required this.holder,
+      required this.thumbnail,
       required this.website});
 
   /// Recibe un json y lo convierte a datos de las prendas
@@ -49,6 +51,7 @@ class Clothes {
         hasBeenLent = json['hasBeenLent'] as bool,
         owner = json['owner'] as String,
         holder = json['holder'] as String,
+        thumbnail = json['thumbnail'] as String,
         website = json['website'] as String;
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
@@ -66,6 +69,7 @@ class Clothes {
         'hasBeenLent': hasBeenLent,
         'owner': owner,
         'holder': holder,
+        'thumbnail': thumbnail,
         'website': website,
       };
 }

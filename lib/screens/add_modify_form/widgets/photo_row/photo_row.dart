@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:wardrobe/provider/category_provider.dart';
 
@@ -22,13 +24,16 @@ class PhotoRow extends StatefulWidget {
 }
 
 class _PhotoRowState extends State<PhotoRow> {
-  String imageBase64 = "";
-  String myBucket = FirebaseStorage.instance.bucket;
+  String imageCache = "";
+  String imageFromProvider = "";
 
   @override
   void initState() {
     super.initState();
-    imageBase64 = context.read<ClothesProvider>().image;
+    imageFromProvider = context.read<ClothesProvider>().image;
+    if (imageFromProvider.isNotEmpty) {
+      imageCache = imageFromProvider;
+    }
   }
 
   @override
@@ -46,7 +51,7 @@ class _PhotoRowState extends State<PhotoRow> {
               color: Colors.grey.shade200,
             ),
             child: Center(
-                child: imageBase64.isEmpty
+                child: imageCache.isEmpty
                     ? const Text(
                         'Sin imagen',
                         style: TextStyle(fontSize: 20, color: Colors.black),
@@ -56,10 +61,12 @@ class _PhotoRowState extends State<PhotoRow> {
                           shape: BoxShape.circle,
                           color: Colors.grey.shade200,
                         ),
-                        child: FadeInImage.assetNetwork(
-                            //fit: BoxFit.cover,
-                            placeholder: "assets/images/clothes.jpg",
-                            image: context.read<ClothesProvider>().image),
+                        child: imageFromProvider.isEmpty
+                            ? Image.file(File(imageCache))
+                            : FadeInImage.assetNetwork(
+                                fit: BoxFit.scaleDown,
+                                placeholder: "assets/images/clothes.jpg",
+                                image: context.read<ClothesProvider>().image),
                       )),
           ),
         ),
@@ -113,60 +120,57 @@ class _PhotoRowState extends State<PhotoRow> {
       CropAspectRatioPreset.square,
     ], uiSettings: [
       AndroidUiSettings(
-          toolbarTitle: 'Crop',
-          cropGridColor: Colors.black,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: true,
-          toolbarWidgetColor:
-              MediaQuery.of(context).platformBrightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black),
+        toolbarTitle: 'Crop',
+        cropGridColor: Colors.black,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: true,
+      ),
+      // toolbarWidgetColor:
+      //     MediaQuery.of(context).platformBrightness == Brightness.light
+      //         ? Colors.white
+      //         : Colors.black),
       IOSUiSettings(title: 'Crop')
     ]);
 
     if (cropped != null) {
-      setState(() {
-        imageFile = File(cropped.path);
-        uploadToStorage(imageFile);
-        Navigator.of(context).pop();
-      });
+      //uploadToStorage(cropped.path);
+      imageCache = context.read<ClothesProvider>().imageCache = cropped.path;
+      setState(() {});
+      Navigator.of(context).pop();
     }
   }
+}
 
-  uploadToStorage(File file) async {
-    final storageRef = FirebaseStorage.instance.ref();
-    final metadata = SettableMetadata(contentType: "image/jpeg");
-    final uniqueUploadID = DateTime.now().millisecondsSinceEpoch.toString();
-    final path =
-        "clothes/${context.read<UserProvider>().currentUser}/${context.read<CategoryProvider>().currentCategory}/$uniqueUploadID.jpg";
-    final uploadTask = storageRef.child(path).putFile(file, metadata);
+Future<String> uploadToStorage(String croppedpath, BuildContext context) async {
+  String imageURL = "";
+  final storageRef = FirebaseStorage.instance.ref();
+  final metadata = SettableMetadata(contentType: "image/jpeg");
+  final uniqueUploadID = DateTime.now().millisecondsSinceEpoch.toString();
+  final databasePath =
+      "clothes/${context.read<UserProvider>().currentUser}/${context.read<CategoryProvider>().currentCategory}/";
 
-    // Listen for state changes, errors, and completion of the upload.
-    uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
-      switch (taskSnapshot.state) {
-        case TaskState.running:
-          final progress =
-              100.0 * (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
-          print("Upload is $progress% complete.");
-          break;
-        case TaskState.paused:
-          print("Upload is paused.");
-          break;
-        case TaskState.canceled:
-          print("Upload was canceled");
-          break;
-        case TaskState.error:
-          // Handle unsuccessful uploads
-          break;
-        case TaskState.success:
-          context.read<ClothesProvider>().image =
-              await storageRef.child(path).getDownloadURL();
-          setState(() {
-            imageBase64 = context.read<ClothesProvider>().image;
-          });
+  Directory tempDir = await getApplicationDocumentsDirectory();
 
-          break;
-      }
-    });
-  }
+  final imageFile = File(croppedpath);
+  final thumb2 = img.decodeImage(File(croppedpath).readAsBytesSync());
+  final thumbnail = img.copyResize(thumb2!, width: 120);
+  await img.encodeJpgFile("${tempDir.path}.thumb.jpg", thumbnail);
+
+  var uploadTask = await storageRef
+      .child("$databasePath/$uniqueUploadID.jpg")
+      .putFile(imageFile, metadata);
+
+  imageURL = await storageRef
+      .child("$databasePath/$uniqueUploadID.jpg")
+      .getDownloadURL();
+
+  uploadTask = await storageRef
+      .child("$databasePath/$uniqueUploadID.thumb.jpg")
+      .putFile(File("${tempDir.path}.thumb.jpg"), metadata);
+
+  String thumbURL = await storageRef
+      .child("$databasePath/$uniqueUploadID.thumb.jpg")
+      .getDownloadURL();
+
+  return "$imageURL#$thumbURL";
 }

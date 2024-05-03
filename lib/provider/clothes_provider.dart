@@ -8,6 +8,7 @@ class ClothesProvider extends ChangeNotifier {
   bool _hasBeenLent = false;
   String _holder = "";
   String _image = "";
+  String _imageCache = "";
   String _model = "";
   String _owner = "";
   String _place = "";
@@ -17,6 +18,7 @@ class ClothesProvider extends ChangeNotifier {
   String _sublocation = "";
   String _warranty = "";
   String _website = "";
+  String _thumbnail = "";
 
   int _cantidad = 0;
 
@@ -71,6 +73,18 @@ class ClothesProvider extends ChangeNotifier {
   String get image => _image;
   set image(String newValue) {
     _image = newValue;
+    notifyListeners();
+  }
+
+  String get thumbnail => _thumbnail;
+  set thumbnail(String newValue) {
+    _thumbnail = newValue;
+    notifyListeners();
+  }
+
+  String get imageCache => _imageCache;
+  set imageCache(String newValue) {
+    _imageCache = newValue;
     notifyListeners();
   }
 

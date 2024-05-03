@@ -35,6 +35,15 @@ class _SublocationRowState extends State<SublocationRow> {
 
     ubicacionesQuery =
         FirebaseDatabase.instance.ref().child('clothes/$user/Ubicaciones');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (location.isNotEmpty) {
+        ubicacionKey = await getKeyFromLocation(location);
+        subUbicacionesQuery = FirebaseDatabase.instance
+            .ref()
+            .child('clothes/$user/Ubicaciones/$ubicacionKey/Sububicaciones');
+      }
+    });
   }
 
   @override
@@ -62,14 +71,16 @@ class _SublocationRowState extends State<SublocationRow> {
           flex: 3,
           child: TextFormField(
             readOnly: true,
-            onTap: () {
+            onTap: () async {
               locController.text.isEmpty
                   ? mySnackBar(
                       context, "Debe seleccionar primero una ubicación")
-                  : myModal(
-                      context,
-                      gimmeLocations(
-                          query: subUbicacionesQuery, isUbicacion: false));
+                  : ubicacionKey.isEmpty
+                      ? ubicacionKey = await getKeyFromLocation(location)
+                      : myModal(
+                          context,
+                          gimmeLocations(
+                              query: subUbicacionesQuery, isUbicacion: false));
             },
             onTapOutside: (event) => context
                 .read<ClothesProvider>()
@@ -147,6 +158,7 @@ class _SublocationRowState extends State<SublocationRow> {
                   ubicacionKey = key!;
                 } else {
                   sublocController.text = ubicacion;
+                  Navigator.of(context).pop();
                 }
               },
               onLongPress: () => {_showContextMenu(context, ubicacion, key!)},
@@ -233,14 +245,20 @@ class _SublocationRowState extends State<SublocationRow> {
             ));
   }
 
-  String getKeyFromLocation(String location) {
-    var myRef = FirebaseDatabase.instance
+  Future<String> getKeyFromLocation(String location) async {
+    String userID = "";
+    var event = await FirebaseDatabase.instance
         .ref()
         .child('clothes/$user/Ubicaciones')
         .orderByChild('ubicacion')
         .equalTo(location)
-        .get();
-    return "hh";
+        .once(DatabaseEventType.value);
+
+    if (event.snapshot.exists) {
+      userID = event.snapshot.children.first.key ?? "";
+    }
+
+    return userID;
   }
 
   @override

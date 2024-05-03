@@ -225,7 +225,7 @@ myModal(BuildContext context, Widget child) {
                 minChildSize: 0.28,
                 expand: false,
                 builder: ((context, scrollController) => Padding(
-                    padding: const EdgeInsets.all(16.0), child: child)));
+                    padding: const EdgeInsets.all(10.0), child: child)));
           }));
 }
 

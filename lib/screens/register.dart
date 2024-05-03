@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Representa la pantalla para hacer login del user
 /// LA PASSW ES @1234andy
@@ -18,27 +19,42 @@ class CreateUserState extends State<CreateUser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('wardrobe')),
-        body: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                "Nuevo usuario",
-                style: TextStyle(fontSize: 24),
-              ),
-            ),
-            Offstage(
-                offstage: error.isEmpty,
-                child: Text(
-                  error,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                )),
-            Padding(padding: const EdgeInsets.all(16.0), child: formulario()),
-          ],
-        ));
+        //appBar: AppBar(title: const Text('wardrobe')),
+        body: Stack(alignment: Alignment.center, children: [
+      Container(
+        alignment: Alignment.bottomLeft,
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/jean2.jpg"),
+                fit: BoxFit.cover)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Registrarse",
+                  style: GoogleFonts.gluten(fontSize: 36, shadows: [
+                    Shadow(
+                        color: Colors.black, offset: Offset.fromDirection(1, 2))
+                  ])),
+              SizedBox(width: 0.0, height: 20),
+              Offstage(
+                  offstage: error.isEmpty,
+                  child: Text(
+                    error,
+                    style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        backgroundColor: Colors.white),
+                  )),
+              SizedBox(width: 0.0, height: 20),
+              formulario(),
+            ],
+          ),
+        ),
+      ),
+    ]));
   }
 
   Widget formulario() => Form(
@@ -53,8 +69,12 @@ class CreateUserState extends State<CreateUser> {
       );
 
   Widget emailFormField() => TextFormField(
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
+            prefixIcon: Icon(Icons.email),
             labelText: "Email",
+            filled: true,
+            fillColor: Colors.white,
             border:
                 OutlineInputBorder(borderRadius: new BorderRadius.circular(8))),
         keyboardType: TextInputType.emailAddress,
@@ -65,7 +85,11 @@ class CreateUserState extends State<CreateUser> {
       );
 
   Widget passwFormField() => TextFormField(
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
+            prefixIcon: Icon(Icons.password),
+            filled: true,
+            fillColor: Colors.white,
             labelText: "Password",
             border:
                 OutlineInputBorder(borderRadius: new BorderRadius.circular(8))),
@@ -79,6 +103,13 @@ class CreateUserState extends State<CreateUser> {
   Widget buttonCreateUser() => FractionallySizedBox(
         widthFactor: 1,
         child: ElevatedButton(
+            style: const ButtonStyle(
+                minimumSize: MaterialStatePropertyAll(Size.fromHeight(60)),
+                shape: MaterialStatePropertyAll(
+                  RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                ),
+                backgroundColor: MaterialStatePropertyAll(Colors.amber)),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
@@ -91,7 +122,10 @@ class CreateUserState extends State<CreateUser> {
                 }
               }
             },
-            child: Text("Create user")),
+            child: Text(
+              "Crear usuario",
+              style: TextStyle(color: Colors.white),
+            )),
       );
 
   Future<UserCredential?> createUser(String email, String passw) async {
@@ -100,16 +134,9 @@ class CreateUserState extends State<CreateUser> {
           .createUserWithEmailAndPassword(email: email, password: passw);
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        setState(() {
-          error = "Email ya en uso";
-        });
-      }
-      if (e.code == 'weak-password') {
-        setState(() {
-          error = "Contraseña muy debil";
-        });
-      }
+      setState(() {
+        error = e.message ?? "";
+      });
     }
     //return null;
   }
