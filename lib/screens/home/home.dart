@@ -199,7 +199,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             Container(
               width: 60,
               child: Text(
-                textScaleFactor: 0.85,
+                textScaleFactor: 0.8,
                 nombre,
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,

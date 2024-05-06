@@ -1,16 +1,10 @@
 # wardrobe
 
-A new Flutter project.
+Una aplicación Android para la gestión de ropa
 
-## Getting Started
+## Primeros pasos
 
-This project is a starting point for a Flutter application.
+1. Descargar la aplicación desde Google Drive
+2. Instalar
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Capturas de pantalla 
