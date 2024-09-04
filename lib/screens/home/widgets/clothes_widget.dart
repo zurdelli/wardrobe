@@ -101,10 +101,13 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                                   alignment: PlaceholderAlignment.baseline,
                                   baseline: TextBaseline.alphabetic,
                                   child: CircleAvatar(
-                                      maxRadius: 5,
+                                      maxRadius: 10,
                                       backgroundColor:
-                                          stringToColor(widget.clothes.color))),
-                              TextSpan(text: " ${widget.clothes.size}"),
+                                          stringToColor(widget.clothes.color),
+                                      child: Text(
+                                        widget.clothes.size,
+                                        style: const TextStyle(fontSize: 12),
+                                      ))),
                             ],
                           ),
                         ),
@@ -113,7 +116,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                           alignment: Alignment.topLeft,
                           child: Text(
                             widget.clothes.sublocation,
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           )),
                       Offstage(
                         offstage: widget.clothes.holder == widget.clothes.owner,
@@ -124,7 +127,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                                       FirebaseAuth.instance.currentUser!.email
                                   ? "Prestada actualmente a ${widget.clothes.holder}"
                                   : "Dueño: ${widget.clothes.owner}",
-                              style: TextStyle(color: Colors.red),
+                              style: const TextStyle(color: Colors.red),
                             )),
                       ),
                       Offstage(
@@ -171,6 +174,9 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                   blendMode: BlendMode.dstIn,
                   child: widget.clothes.image.isNotEmpty
                       ? FadeInImage.assetNetwork(
+                          height: 300,
+                          fit: BoxFit.fill,
+                          placeholderFit: BoxFit.fill,
                           placeholder: 'assets/images/clothes.jpg',
                           image: widget.clothes.image)
                       : Image.asset('assets/images/clothes.jpg'),
@@ -178,8 +184,21 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.clothes.brand,
-                        style: const TextStyle(fontSize: 20)),
+                    Row(
+                      children: [
+                        Text(widget.clothes.brand,
+                            style: const TextStyle(fontSize: 20)),
+                        SizedBox(width: 10),
+                        CircleAvatar(
+                            maxRadius: 10,
+                            backgroundColor:
+                                stringToColor(widget.clothes.color),
+                            child: Text(
+                              widget.clothes.size,
+                              style: const TextStyle(fontSize: 12),
+                            )),
+                      ],
+                    ),
                     Text(widget.clothes.sublocation.isNotEmpty
                         ? "${widget.clothes.place} - ${widget.clothes.sublocation}"
                         : widget.clothes.place),
@@ -191,7 +210,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                 height: 20,
                 child: Text.rich(
                   TextSpan(
-                      text: "Comprado el ${widget.clothes.date}",
+                      text: widget.clothes.date,
                       style: const TextStyle(fontSize: 14),
                       children: [
                         TextSpan(
@@ -201,21 +220,6 @@ class _ClothesWidgetState extends State<ClothesWidget> {
                         TextSpan(
                             text: widget.clothes.storePlace.isNotEmpty
                                 ? " en ${widget.clothes.storePlace}"
-                                : ""),
-                      ]),
-                ),
-              ),
-              Container(
-                alignment: Alignment.bottomLeft,
-                height: 20,
-                child: Text.rich(
-                  TextSpan(
-                      text: "Talla: ${widget.clothes.size}",
-                      style: const TextStyle(fontSize: 14),
-                      children: [
-                        TextSpan(
-                            text: widget.clothes.color.isNotEmpty
-                                ? " Color: ${widget.clothes.color}"
                                 : ""),
                       ]),
                 ),
@@ -291,6 +295,7 @@ class _ClothesWidgetState extends State<ClothesWidget> {
     context.read<ClothesProvider>().sublocation = widget.clothes.sublocation;
     context.read<ClothesProvider>().warranty = widget.clothes.warranty;
     context.read<ClothesProvider>().website = widget.clothes.website;
+    context.read<ClothesProvider>().thumbnail = widget.clothes.thumbnail;
 
     Navigator.popAndPushNamed(context, "/formclothes",
             arguments: widget.nodeKey)

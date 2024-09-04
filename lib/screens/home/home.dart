@@ -109,6 +109,7 @@ class MyWardrobeState extends State<MyWardrobe> {
           context.read<ClothesProvider>().store = "";
           context.read<ClothesProvider>().sublocation = "";
           context.read<ClothesProvider>().warranty = "";
+          context.read<ClothesProvider>().thumbnail = "";
           Navigator.pushNamed(context, "/formclothes").then((_) {});
         },
       ),
@@ -240,13 +241,13 @@ class MyWardrobeState extends State<MyWardrobe> {
                   ),
                 ),
               ),
-              // IconButton(
-              //     onPressed: () {
-              //       setState(() {
-              //         showFilters = !showFilters;
-              //       });
-              //     },
-              //     icon: const Icon(Icons.filter_list))
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      showFilters = !showFilters;
+                    });
+                  },
+                  icon: const Icon(Icons.filter_list))
             ],
           ),
           //const SizedBox(height: 15),
@@ -300,16 +301,16 @@ class MyWardrobeState extends State<MyWardrobe> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text("Filtrar", style: TextStyle(fontSize: 20)),
+        const Text("Filtrar", style: TextStyle(fontSize: 20)),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text("Color", style: TextStyle(fontSize: 18)),
+            const Text("Color", style: TextStyle(fontSize: 18)),
             ColorsRow(),
           ],
         ),
-        Row(
+        const Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -321,7 +322,7 @@ class MyWardrobeState extends State<MyWardrobe> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text("Marca", style: TextStyle(fontSize: 18)),
+            const Text("Marca", style: TextStyle(fontSize: 18)),
             SizedBox(
               width: 100,
               child: TextField(
@@ -330,7 +331,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             ),
           ],
         ),
-        ElevatedButton(onPressed: () {}, child: Text("Aceptar"))
+        ElevatedButton(onPressed: () {}, child: const Text("Aceptar"))
       ],
     );
   }
@@ -498,6 +499,7 @@ class MyWardrobeState extends State<MyWardrobe> {
             ));
   }
 
+  /// Updates the query made to database
   updateQuery({required String categoriaLocal, required String placeLocal}) {
     setState(() {
       categoria =
@@ -505,9 +507,9 @@ class MyWardrobeState extends State<MyWardrobe> {
       selectedPlace = placeLocal;
       dbReference =
           FirebaseDatabase.instance.ref().child('clothes/$user/$categoria');
-      query = selectedPlace.isNotEmpty
-          ? dbReference.orderByChild('place').equalTo(selectedPlace)
-          : dbReference;
+
+      query = dbReference.orderByChild('place').equalTo(selectedPlace);
+
       //if (FirebaseAuth.instance.currentUser != null) {
       countChildren(dbReference);
       //}
@@ -531,7 +533,7 @@ class MyWardrobeState extends State<MyWardrobe> {
   Widget profileDrawer(BuildContext context) {
     return Column(
       children: [
-        SizedBox(width: 0.0, height: 50),
+        const SizedBox(width: 0.0, height: 50),
         SizedBox(
           height: 300,
           child: Column(

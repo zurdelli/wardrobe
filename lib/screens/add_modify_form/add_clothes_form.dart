@@ -166,16 +166,20 @@ class _ClothesFormState extends State<ClothesForm> {
         onPressed: () async {
           if (context.read<ClothesProvider>().place.isNotEmpty) {
             if (context.read<ClothesProvider>().image.isEmpty) {
+              // imageCache is the loaded on cache image, but is not uploaded
               if (context.read<ClothesProvider>().imageCache.isNotEmpty) {
                 await uploadToStorage(
                         context.read<ClothesProvider>().imageCache, context)
                     .then(
-                  (value) {
-                    final divider = value.indexOf('#');
+                  // v is the value of the url of the uploaded image
+                  (v) {
+                    // v is split by an # so we could get the image and the thumb
+                    // by the divider
+                    final divider = v.indexOf('#');
                     context.read<ClothesProvider>().image =
-                        value.substring(0, divider);
+                        v.substring(0, divider);
                     context.read<ClothesProvider>().thumbnail =
-                        value.substring(divider + 1, value.length);
+                        v.substring(divider + 1, v.length);
                   },
                 );
               }
