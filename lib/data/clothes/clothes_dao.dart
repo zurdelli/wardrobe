@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'clothes_model.dart';
 
 /// clothes DATA ACCESS OBJECT. Aqui se hace el CRUD de la base de datos
@@ -19,6 +20,15 @@ class ClothesDAO {
 
     myRef.set(clothes.toJson());
     return myRef.key;
+  }
+
+  String? guardarClothesFirestore(
+      Clothes clothes, CollectionReference clothesRef, String key) {
+    DocumentReference myRef =
+        key == "null" ? clothesRef.doc() : clothesRef.doc(key);
+
+    myRef.set(clothes.toJson());
+    return "myRef.key";
   }
 
   String? updateWarranty(DatabaseReference clothesRef, String warranty) {

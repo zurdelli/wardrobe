@@ -11,13 +11,13 @@ class User {
       required this.image});
 
   /// Recibe un json y lo convierte a datos
-  User.fromJson(Map<dynamic, dynamic> json)
+  User.fromJson(Map<String, dynamic> json)
       : name = json['name'] as String,
         email = json['email'] as String,
         id = json['id'] as String,
         image = json['image'] as String;
 
-  Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'name': name,
         'email': email,
         'id': id,

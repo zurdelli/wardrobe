@@ -36,7 +36,8 @@ class Clothes {
       required this.website});
 
   /// Recibe un json y lo convierte a datos de las prendas
-  Clothes.fromJson(Map<dynamic, dynamic> json)
+  //Clothes.fromJson(Map<dynamic, dynamic> json)
+  Clothes.fromJson(Map<String, dynamic> json)
       : sublocation = json['sublocation'] as String,
         brand = json['brand'] as String,
         color = json['color'] as String,
@@ -54,7 +55,8 @@ class Clothes {
         thumbnail = json['thumbnail'] as String,
         website = json['website'] as String;
 
-  Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
+  //Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
+  Map<String, dynamic> toJson() => <String, dynamic>{
         'sublocation': sublocation,
         'brand': brand,
         'color': color,

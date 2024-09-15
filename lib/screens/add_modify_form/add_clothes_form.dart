@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class ClothesForm extends StatefulWidget {
 class _ClothesFormState extends State<ClothesForm> {
   String currentUser = "", currentCategory = "";
   late DatabaseReference _clothesRef;
+  var _clothesRefFirestore;
   String nodeKey = "";
   bool estaAbierto = false;
 
@@ -49,6 +51,8 @@ class _ClothesFormState extends State<ClothesForm> {
     _clothesRef = FirebaseDatabase.instance
         .ref()
         .child('clothes/$currentUser/$currentCategory');
+    _clothesRefFirestore = FirebaseFirestore.instance
+        .collection('wardrobe/$currentUser/Granollers, España');
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -185,7 +189,7 @@ class _ClothesFormState extends State<ClothesForm> {
               }
             }
 
-            ClothesDAO().guardarClothes(
+            ClothesDAO().guardarClothesFirestore(
                 Clothes(
                     brand: context.read<ClothesProvider>().brand,
                     color: colorToString(context.read<ClothesProvider>().color),
@@ -207,7 +211,7 @@ class _ClothesFormState extends State<ClothesForm> {
                     sublocation: context.read<ClothesProvider>().sublocation,
                     warranty: context.read<ClothesProvider>().warranty,
                     website: context.read<ClothesProvider>().website),
-                _clothesRef,
+                _clothesRefFirestore,
                 nodeKey);
             Navigator.pop(context);
           } else {

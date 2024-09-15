@@ -53,6 +53,8 @@ dependencies:
   image:
   path_provider: 
   flutter_launcher_icons:
+  cloud_firestore: ^4.14.0
+  localstorage: 
 
 flutter_launcher_icons:
   image_path: "assets/images/logo.png"
